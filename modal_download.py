@@ -30,6 +30,8 @@ def cli_help():
     volumes={DATA_DIR: data},
     secrets=[modal.Secret.from_name("zod-download")],
     timeout=24 * 3600,
+    cpu=4,
+    memory=8192,
 )
 def download(subset: str = "frames", version: str = "mini", dry_run: bool = False):
     """Camera (blur) + annotations + infos only: no LiDAR, no OXTS, no DNAT copy."""
@@ -42,6 +44,7 @@ def download(subset: str = "frames", version: str = "mini", dry_run: bool = Fals
         f"--subset={subset}", f"--version={version}",
         "--images", "--blur", "--no-dnat", "--annotations", "--infos",
         "--no-lidar", "--no-oxts",
+        "--no-extract",  # keep .tar.gz: unpacking 100k images would create a huge file count on the volume
     ]
     if dry_run:
         cmd.append("--dry-run")

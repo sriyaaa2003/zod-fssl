@@ -1,0 +1,98 @@
+# Every tunable lives here (see docs/BLUEPRINT.md section 9). Paths are Modal-volume paths.
+
+[data]
+root = "/data"                       # Modal volume mount
+raw_dir = "/data/zod_raw/frames"     # where the torrent/Dropbox download lands
+shards_dir = "/data/shards"          # uint8 image shards written by prep
+index_path = "/data/index.parquet"   # frame index written by index step
+image_hw = [144, 256]                # stored/trained resolution (H, W), 16:9
+shard_size = 2000                    # frames per shard
+max_frames = 0                       # 0 = use every frame; otherwise cap for quick runs
+max_corrupt_fraction = 0.002         # prep fails if more than this fraction of images cannot be decoded
+probe_fraction = 0.20                # held-out frames for probes, half probe_train / half probe_test
+probe_seed = 7                       # fixes the stream/probe split independently of run seeds
+
+[index]
+night_values = ["night", "twilight"]                  # time_of_day values counted as "night" light
+condition_columns = ["road_condition", "light"]       # joined with "/" into the condition group `cond`
+vru_columns = ["num_vulnerable_vehicles", "num_pedestrians"]   # vulnerable road user present if any > 0
+density_column = "num_vehicles"
+density_bins = 3                                      # quantile bins -> label_density
+
+[federation]
+n_rounds = 24                        # slices of the timeline with equal numbers of stream frames
+client_key = "country"               # index column that defines clients
+min_client_frames = 200              # clients with fewer stream frames are dropped
+arrival_batch = 128                  # frames arriving together
+train_batch = 32                     # step once the buffer holds this many kept frames
+min_final_batch = 8                  # flush a final step if at least this many remain
+max_buffer = 63                      # hard cap on frames held at once (single pass, no replay)
+local_lr = 0.02
+backbone_lr_mult = 0.003             # pretrained layer3/layer4 use local_lr * this; chosen from a label-free collapse check (README)
+momentum = 0.9
+weight_decay = 1e-4
+pretrained = true                    # ImageNet init for the backbone (see ADR-3)
+rarity_floor = 1e-4                  # lower bound on condition frequency q(c) in rarity scoring
+
+[selection]
+kind = "random"                      # all | random | loss | novelty | rarity
+budget = 0.2                         # fraction of arriving frames used for updates
+novelty_ema = 0.99
+
+[aggregation]
+kind = "fedavg"                      # fedavg | balanced
+
+[eval]
+eval_every = 6                       # evaluate after these many rounds (and the last)
+probe_c = 1.0                        # inverse L2 strength for the logistic-regression probe
+probe_fractions = [1.0, 0.1]         # full probe_train, and a low-label probe on 10% of it (named task@10pct)
+min_group_size = 30                  # smaller test groups are reported as n/a
+bootstrap = 200
+
+# Probe tasks (ADR-6, chosen after inspecting ZOD metadata). group_col decides how test frames are grouped.
+[[eval.tasks]]
+name = "vru_present"                 # pedestrian or vulnerable vehicle visible
+label_col = "label_vru"
+group_col = "cond"
+
+[[eval.tasks]]
+name = "road_type"
+label_col = "label_road_type"
+group_col = "cond"
+
+[[eval.tasks]]
+name = "traffic_density"
+label_col = "label_density"
+group_col = "cond"
+
+[[eval.tasks]]
+name = "road_condition"              # grouped by light because cond already contains road condition
+label_col = "label_road_condition"
+group_col = "light"
+
+[stage2]                             # generation gap: A (gen 1) -> B (gen 2) -> C (gen 3)
+gen_countries = [["PL", "DE", "FR"], ["SE", "GB", "IE", "CZ"], ["IT", "NO", "HU", "NL", "LU"]]
+archs = ["resnet18", "mobilenet_v3_small", "mobilenet_v3_small"]
+sensor_hw = [[144, 256], [108, 192], [72, 128]]      # camera resolution each generation sees (H, W)
+sensor_fov = [1.0, 0.9, 0.8]                         # centre-crop fraction = narrower field of view
+quant_bits = [0, 0, 8]                               # weight bits at deployment (0 = float32)
+n_rounds = 8
+passes = 2                                           # passes over each client's round data
+batch = 64
+lr = 0.01
+backbone_lr_mult = 0.03                      # pretrained body learns at lr * this (BLUEPRINT ADR-16)
+grad_clip = 5.0
+max_skipped_fraction = 0.02
+momentum = 0.9
+weight_decay = 1e-4
+temperature = 2.0
+rarity_alpha = 0.5                                   # rarity-aware distillation weight (1/q)^alpha; 0 = off
+floor_label_fraction = 0.01                          # labelled share for the "floor" reference
+n_public = 3000                                      # public set size for public-set distillation
+teacher_sees = "old"                                 # dual-sensor transition cars: teacher reads the old camera view
+pretrained = true
+
+[run]
+seeds = [0, 1, 2]
+device = "cuda"
+results_dir = "/data/results"
