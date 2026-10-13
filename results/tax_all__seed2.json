@@ -1,0 +1,5430 @@
+{
+ "tag": "tax_all",
+ "seed": 2,
+ "config": {
+  "data": {
+   "root": "/data",
+   "raw_dir": "/data/zod_raw/frames",
+   "shards_dir": "/kaggle/input/datasets/saf2003/zod-fssl-shards",
+   "index_path": "/kaggle/input/datasets/saf2003/zod-fssl-shards/index.parquet",
+   "image_hw": [
+    144,
+    256
+   ],
+   "shard_size": 2000,
+   "max_frames": 0,
+   "max_corrupt_fraction": 0.002,
+   "probe_fraction": 0.2,
+   "probe_seed": 7
+  },
+  "index": {
+   "night_values": [
+    "night",
+    "twilight"
+   ],
+   "condition_columns": [
+    "road_condition",
+    "light"
+   ],
+   "vru_columns": [
+    "num_vulnerable_vehicles",
+    "num_pedestrians"
+   ],
+   "density_column": "num_vehicles",
+   "density_bins": 3
+  },
+  "federation": {
+   "n_rounds": 24,
+   "client_key": "country",
+   "min_client_frames": 200,
+   "arrival_batch": 128,
+   "train_batch": 32,
+   "min_final_batch": 8,
+   "max_buffer": 63,
+   "local_lr": 0.02,
+   "backbone_lr_mult": 0.003,
+   "momentum": 0.9,
+   "weight_decay": 0.0001,
+   "pretrained": true,
+   "rarity_floor": 0.0001,
+   "train_layers": [
+    "layer3",
+    "layer4"
+   ],
+   "anchor_mu": 0.0
+  },
+  "selection": {
+   "kind": "all",
+   "budget": 1.0,
+   "novelty_ema": 0.99
+  },
+  "aggregation": {
+   "kind": "fedavg",
+   "tau": 0.7
+  },
+  "eval": {
+   "eval_every": 6,
+   "probe_c": 1.0,
+   "probe_fractions": [
+    1.0,
+    0.1
+   ],
+   "interp_alphas": [
+    0.25,
+    0.5,
+    0.75
+   ],
+   "min_group_size": 30,
+   "bootstrap": 200,
+   "tasks": [
+    {
+     "name": "vru_present",
+     "label_col": "label_vru",
+     "group_col": "cond"
+    },
+    {
+     "name": "road_type",
+     "label_col": "label_road_type",
+     "group_col": "cond"
+    },
+    {
+     "name": "traffic_density",
+     "label_col": "label_density",
+     "group_col": "cond"
+    },
+    {
+     "name": "road_condition",
+     "label_col": "label_road_condition",
+     "group_col": "light"
+    }
+   ]
+  },
+  "stage2": {
+   "gen_countries": [
+    [
+     "PL",
+     "DE",
+     "FR"
+    ],
+    [
+     "SE",
+     "GB",
+     "IE",
+     "CZ"
+    ],
+    [
+     "IT",
+     "NO",
+     "HU",
+     "NL",
+     "LU"
+    ]
+   ],
+   "archs": [
+    "resnet18",
+    "mobilenet_v3_small",
+    "mobilenet_v3_small"
+   ],
+   "sensor_hw": [
+    [
+     144,
+     256
+    ],
+    [
+     108,
+     192
+    ],
+    [
+     72,
+     128
+    ]
+   ],
+   "sensor_fov": [
+    1.0,
+    0.9,
+    0.8
+   ],
+   "quant_bits": [
+    0,
+    0,
+    8
+   ],
+   "n_rounds": 8,
+   "passes": 2,
+   "batch": 64,
+   "lr": 0.01,
+   "backbone_lr_mult": 0.03,
+   "grad_clip": 5.0,
+   "max_skipped_fraction": 0.02,
+   "momentum": 0.9,
+   "weight_decay": 0.0001,
+   "temperature": 2.0,
+   "rarity_alpha": 0.5,
+   "floor_label_fraction": 0.01,
+   "n_public": 3000,
+   "teacher_sees": "old",
+   "pretrained": true
+  },
+  "run": {
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "device": "cuda",
+   "results_dir": "/kaggle/working/results"
+  }
+ },
+ "n_params": 11406080,
+ "clients": [
+  "CZ",
+  "DE",
+  "FR",
+  "GB",
+  "HU",
+  "IE",
+  "IT",
+  "LU",
+  "NL",
+  "NO",
+  "PL",
+  "SE"
+ ],
+ "cond_names": [
+  "normal/day",
+  "normal/night",
+  "snow/day",
+  "snow/night",
+  "wet/day",
+  "wet/night"
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "n_active": 6,
+   "n_trained": 6,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.03004048008061502,
+   "weights": {
+    "DE": 0.046889089269612265,
+    "FR": 0.011722272317403066,
+    "GB": 0.22242260294559663,
+    "NL": 0.0123234144875263,
+    "NO": 0.3892395551547941,
+    "SE": 0.3174030658250676
+   },
+   "kept_by_cond": {
+    "normal/day": 1020,
+    "normal/night": 340,
+    "snow/day": 1234,
+    "snow/night": 355,
+    "wet/day": 353,
+    "wet/night": 25
+   },
+   "max_buffer_seen": 28
+  },
+  {
+   "round": 1,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.11512542955932163,
+   "weights": {
+    "DE": 0.379921851517884,
+    "SE": 0.6200781484821161
+   },
+   "kept_by_cond": {
+    "normal/day": 3260,
+    "normal/night": 23,
+    "snow/day": 2,
+    "wet/day": 42
+   },
+   "max_buffer_seen": 16
+  },
+  {
+   "round": 2,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.29647346763383775,
+   "weights": {
+    "DE": 0.3219116321009919,
+    "SE": 0.6780883678990082
+   },
+   "kept_by_cond": {
+    "normal/day": 3024,
+    "normal/night": 223,
+    "wet/day": 3,
+    "wet/night": 77
+   },
+   "max_buffer_seen": 16
+  },
+  {
+   "round": 3,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.48239478128296986,
+   "weights": {
+    "DE": 0.03125939284640818,
+    "SE": 0.9687406071535918
+   },
+   "kept_by_cond": {
+    "normal/day": 3056,
+    "normal/night": 201,
+    "wet/day": 69,
+    "wet/night": 1
+   },
+   "max_buffer_seen": 23
+  },
+  {
+   "round": 4,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.5885525560722902,
+   "weights": {
+    "IT": 0.7318905921250376,
+    "SE": 0.2681094078749624
+   },
+   "kept_by_cond": {
+    "normal/day": 3203,
+    "normal/night": 118,
+    "snow/day": 1,
+    "wet/day": 4,
+    "wet/night": 1
+   },
+   "max_buffer_seen": 28
+  },
+  {
+   "round": 5,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3326,
+   "n_kept": 3326,
+   "mean_loss": -0.6179656784694928,
+   "weights": {
+    "IT": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 2683,
+    "normal/night": 350,
+    "wet/day": 293
+   },
+   "max_buffer_seen": 30
+  },
+  {
+   "round": 6,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.6199919036947764,
+   "weights": {
+    "IT": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 1998,
+    "normal/night": 1320,
+    "snow/day": 1,
+    "wet/day": 2,
+    "wet/night": 6
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 7,
+   "n_active": 4,
+   "n_trained": 4,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.6618906878289722,
+   "weights": {
+    "DE": 0.7883979561166216,
+    "FR": 0.0036068530207394047,
+    "IT": 0.11030958821761347,
+    "NL": 0.09768560264502554
+   },
+   "kept_by_cond": {
+    "normal/day": 2323,
+    "normal/night": 857,
+    "snow/day": 2,
+    "snow/night": 2,
+    "wet/day": 129,
+    "wet/night": 14
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 8,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7116223900363996,
+   "weights": {
+    "DE": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 1642,
+    "normal/night": 243,
+    "wet/day": 1420,
+    "wet/night": 22
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 9,
+   "n_active": 2,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7076291407530124,
+   "weights": {
+    "DE": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 2197,
+    "normal/night": 405,
+    "snow/day": 2,
+    "snow/night": 6,
+    "wet/day": 214,
+    "wet/night": 502
+   },
+   "max_buffer_seen": 30
+  },
+  {
+   "round": 10,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.6761690097195762,
+   "weights": {
+    "DE": 0.9957920048091373,
+    "NL": 0.004207995190862639
+   },
+   "kept_by_cond": {
+    "normal/day": 1936,
+    "normal/night": 891,
+    "snow/day": 2,
+    "wet/day": 289,
+    "wet/night": 209
+   },
+   "max_buffer_seen": 17
+  },
+  {
+   "round": 11,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3326,
+   "n_kept": 3326,
+   "mean_loss": -0.7086882250240216,
+   "weights": {
+    "DE": 0.9921828021647625,
+    "NL": 0.007817197835237523
+   },
+   "kept_by_cond": {
+    "normal/day": 1808,
+    "normal/night": 998,
+    "snow/day": 1,
+    "snow/night": 4,
+    "wet/day": 295,
+    "wet/night": 220
+   },
+   "max_buffer_seen": 26
+  },
+  {
+   "round": 12,
+   "n_active": 3,
+   "n_trained": 3,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7147279807499477,
+   "weights": {
+    "DE": 0.3928464081755335,
+    "NO": 0.015329125338142471,
+    "SE": 0.591824466486324
+   },
+   "kept_by_cond": {
+    "normal/day": 773,
+    "normal/night": 338,
+    "snow/day": 917,
+    "snow/night": 999,
+    "wet/day": 222,
+    "wet/night": 78
+   },
+   "max_buffer_seen": 27
+  },
+  {
+   "round": 13,
+   "n_active": 3,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7325314272017706,
+   "weights": {
+    "FR": 0.688647997591087,
+    "SE": 0.311352002408913
+   },
+   "kept_by_cond": {
+    "normal/day": 2016,
+    "normal/night": 225,
+    "snow/day": 796,
+    "snow/night": 221,
+    "wet/day": 53,
+    "wet/night": 10
+   },
+   "max_buffer_seen": 15
+  },
+  {
+   "round": 14,
+   "n_active": 4,
+   "n_trained": 4,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7331130998475212,
+   "weights": {
+    "DE": 0.01021941689209498,
+    "FR": 0.8677487225728885,
+    "LU": 0.07123534715960325,
+    "SE": 0.050796513375413285
+   },
+   "kept_by_cond": {
+    "normal/day": 2886,
+    "normal/night": 382,
+    "snow/day": 4,
+    "snow/night": 11,
+    "wet/day": 37,
+    "wet/night": 7
+   },
+   "max_buffer_seen": 13
+  },
+  {
+   "round": 15,
+   "n_active": 6,
+   "n_trained": 6,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7119514269488199,
+   "weights": {
+    "DE": 0.004809137360985873,
+    "FR": 0.4250075142771265,
+    "LU": 0.018935978358881875,
+    "NO": 0.039374812143071834,
+    "PL": 0.10519987977156597,
+    "SE": 0.4066726780883679
+   },
+   "kept_by_cond": {
+    "normal/day": 1593,
+    "normal/night": 293,
+    "snow/day": 606,
+    "snow/night": 492,
+    "wet/day": 238,
+    "wet/night": 105
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 16,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7456189522949549,
+   "weights": {
+    "PL": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 350,
+    "normal/night": 24,
+    "snow/day": 5,
+    "wet/day": 2776,
+    "wet/night": 172
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 17,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3326,
+   "n_kept": 3326,
+   "mean_loss": -0.7276305170286269,
+   "weights": {
+    "PL": 0.9966927239927841,
+    "SE": 0.003307276007215875
+   },
+   "kept_by_cond": {
+    "normal/day": 1366,
+    "normal/night": 241,
+    "wet/day": 1354,
+    "wet/night": 365
+   },
+   "max_buffer_seen": 19
+  },
+  {
+   "round": 18,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.6617385464218947,
+   "weights": {
+    "PL": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 895,
+    "normal/night": 1949,
+    "snow/night": 3,
+    "wet/day": 155,
+    "wet/night": 325
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 19,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.71239909902215,
+   "weights": {
+    "PL": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 1593,
+    "normal/night": 1463,
+    "wet/day": 249,
+    "wet/night": 22
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 20,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7626316363994892,
+   "weights": {
+    "PL": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 2410,
+    "normal/night": 394,
+    "wet/day": 505,
+    "wet/night": 18
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 21,
+   "n_active": 2,
+   "n_trained": 2,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7507942834725747,
+   "weights": {
+    "PL": 0.9720468890892696,
+    "SE": 0.027953110910730387
+   },
+   "kept_by_cond": {
+    "normal/day": 2049,
+    "normal/night": 640,
+    "snow/day": 1,
+    "snow/night": 1,
+    "wet/day": 570,
+    "wet/night": 66
+   },
+   "max_buffer_seen": 29
+  },
+  {
+   "round": 22,
+   "n_active": 1,
+   "n_trained": 1,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7612146230844351,
+   "weights": {
+    "PL": 1.0
+   },
+   "kept_by_cond": {
+    "normal/day": 2242,
+    "normal/night": 951,
+    "snow/night": 1,
+    "wet/day": 119,
+    "wet/night": 14
+   },
+   "max_buffer_seen": 31
+  },
+  {
+   "round": 23,
+   "n_active": 7,
+   "n_trained": 6,
+   "n_seen": 3327,
+   "n_kept": 3327,
+   "mean_loss": -0.7348698948351842,
+   "weights": {
+    "CZ": 0.11785929043896573,
+    "DE": 0.015333734215273603,
+    "FR": 0.07696933253156946,
+    "HU": 0.3619963920625376,
+    "IE": 0.1719783523752255,
+    "PL": 0.2558628983764281
+   },
+   "kept_by_cond": {
+    "normal/day": 2216,
+    "normal/night": 734,
+    "wet/day": 226,
+    "wet/night": 150
+   },
+   "max_buffer_seen": 28
+  }
+ ],
+ "evals": [
+  {
+   "feature_std_normalized": 0.019982896745204926,
+   "feature_erank": 90.89263412918724,
+   "n_probe_train": 9987,
+   "n_probe_test": 9987,
+   "tasks": {
+    "vru_present": {
+     "by_cond": {
+      "overall_acc": 0.8566135976769801,
+      "mean_group_acc": 0.8204282756350404,
+      "worst_group_acc": 0.7424749163879598,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.890298138692143,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7935294117647059,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7960526315789473,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8778625954198473,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.8223519599666389,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.7424749163879598,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8055877221522728,
+       0.8317866156313362
+      ],
+      "worst_group_ci95": [
+       0.6888795986622074,
+       0.7763706140350877
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8566135976769801,
+      "mean_group_acc": 0.8431902034183346,
+      "worst_group_acc": 0.7450980392156863,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.7755102040816326,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.9122736418511066,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7660069848661234,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7912087912087912,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7785234899328859,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8714285714285714,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8508474576271187,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.972972972972973,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7450980392156863,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9337016574585635,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.811413578222368,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.909297052154195,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8216355372263459,
+       0.8596728551028558
+      ],
+      "worst_group_ci95": [
+       0.6078431372549019,
+       0.7729918509895227
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 9987
+    },
+    "vru_present@10pct": {
+     "by_cond": {
+      "overall_acc": 0.8062481225593271,
+      "mean_group_acc": 0.7791178180545456,
+      "worst_group_acc": 0.6688963210702341,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8375885356613408,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7435294117647059,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7587719298245614,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8969465648854962,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.7689741451209341,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6688963210702341,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7679886725204373,
+       0.7917071816123876
+      ],
+      "worst_group_ci95": [
+       0.6118729096989967,
+       0.7224399313501144
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8062481225593271,
+      "mean_group_acc": 0.7891203059225611,
+      "worst_group_acc": 0.6078431372549019,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.7551020408163265,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8611670020120724,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7089639115250291,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7582417582417582,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7785234899328859,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7857142857142857,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8016949152542373,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.6078431372549019,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9005524861878453,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.7609052148245327,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.858843537414966,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.76557133901038,
+       0.8078159487670405
+      ],
+      "worst_group_ci95": [
+       0.48970588235294116,
+       0.7058823529411765
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 998
+    },
+    "road_type": {
+     "by_cond": {
+      "overall_acc": 0.664463802943827,
+      "mean_group_acc": 0.6265825612254056,
+      "worst_group_acc": 0.4916387959866221,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.686377861966727,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6405882352941177,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.6206140350877193,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.6755725190839694,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.6447039199332777,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.4916387959866221,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.610400496577755,
+       0.6413515554630201
+      ],
+      "worst_group_ci95": [
+       0.4313545150501672,
+       0.5585284280936454
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.664463802943827,
+      "mean_group_acc": 0.6657277678994679,
+      "worst_group_acc": 0.45714285714285713,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.8571428571428571,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.641046277665996,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.7692307692307693,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5657741559953434,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5054945054945055,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7651006711409396,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.45714285714285713,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6101694915254238,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5675675675675675,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.8235294117647058,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7513812154696132,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.6530009839291571,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.7913832199546486,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6389454397683753,
+       0.6862946778313471
+      ],
+      "worst_group_ci95": [
+       0.3425,
+       0.5288186813186814
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 9987
+    },
+    "road_type@10pct": {
+     "by_cond": {
+      "overall_acc": 0.579052768599179,
+      "mean_group_acc": 0.5515414580344797,
+      "worst_group_acc": 0.42474916387959866,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5941360566628232,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5794117647058824,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.5877192982456141,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.5877862595419847,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5354462051709759,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.42474916387959866,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5363971730590742,
+       0.5677273780898862
+      ],
+      "worst_group_ci95": [
+       0.37775919732441476,
+       0.47500000000000003
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.579052768599179,
+      "mean_group_acc": 0.5777662227111645,
+      "worst_group_acc": 0.34285714285714286,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.5918367346938775,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5754527162977867,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.7692307692307693,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.46565774155995343,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.6845637583892618,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.34285714285714286,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.538135593220339,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5675675675675675,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7647058823529411,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6574585635359116,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5565759265332896,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.6938775510204082,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5518667436337321,
+       0.6020044648286204
+      ],
+      "worst_group_ci95": [
+       0.2567857142857143,
+       0.4483701979045402
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 998
+    },
+    "traffic_density": {
+     "by_cond": {
+      "overall_acc": 0.5707419645539201,
+      "mean_group_acc": 0.677717121548079,
+      "worst_group_acc": 0.5249547026848954,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5249547026848954,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6141176470588235,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.8135964912280702,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.916030534351145,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5554628857381151,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6421404682274248,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6638605832495715,
+       0.6921552071009751
+      ],
+      "worst_group_ci95": [
+       0.5132556415746994,
+       0.5355007412287927
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5707419645539201,
+      "mean_group_acc": 0.596275566028362,
+      "worst_group_acc": 0.5054945054945055,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5102040816326531,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5360160965794769,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5133876600698487,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5054945054945055,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.5167785234899329,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6161016949152542,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.5686274509803921,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8784530386740331,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5664152181042965,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5890022675736961,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5680730092882942,
+       0.6241525786623804
+      ],
+      "worst_group_ci95": [
+       0.34678178963893247,
+       0.5098039215686274
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "traffic_density@10pct": {
+     "by_cond": {
+      "overall_acc": 0.4937418644237509,
+      "mean_group_acc": 0.5969001647452935,
+      "worst_group_acc": 0.4531378685554274,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.4531378685554274,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5135294117647059,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7828947368421053,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8129770992366412,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.48040033361134277,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5384615384615384,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.581537668176101,
+       0.6108403869118275
+      ],
+      "worst_group_ci95": [
+       0.44093422784511715,
+       0.46388568604842695
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.4937418644237509,
+      "mean_group_acc": 0.5123934520425723,
+      "worst_group_acc": 0.37362637362637363,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5306122448979592,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.4398390342052314,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.42840512223515714,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.37362637362637363,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.44966442953020136,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7571428571428571,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5245762711864407,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5135135135135135,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.4117647058823529,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6740331491712708,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5024598228927517,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5430839002267573,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.4880059138778254,
+       0.5387595200319768
+      ],
+      "worst_group_ci95": [
+       0.26373626373626374,
+       0.42843324921283527
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    },
+    "road_condition": {
+     "by_light": {
+      "overall_acc": 0.885250826073896,
+      "mean_group_acc": 0.8773432339814681,
+      "worst_group_acc": 0.8628925254312251,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8917939425317111,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8628925254312251,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8698877832057111,
+       0.8853771192592191
+      ],
+      "worst_group_ci95": [
+       0.8478328173374613,
+       0.8788257408226449
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.885250826073896,
+      "mean_group_acc": 0.8717930929252621,
+      "worst_group_acc": 0.6408839779005525,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8631790744466801,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.919674039580908,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7802197802197802,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9463087248322147,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7285714285714285,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9576271186440678,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9607843137254902,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6408839779005525,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8704493276484093,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9019274376417233,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8564313403598987,
+       0.8844567939578835
+      ],
+      "worst_group_ci95": [
+       0.574585635359116,
+       0.6961325966850829
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "road_condition@10pct": {
+     "by_light": {
+      "overall_acc": 0.8566135976769801,
+      "mean_group_acc": 0.8444432448238501,
+      "worst_group_acc": 0.8222025652366209,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8666839244110794,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8222025652366209,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8350788263791149,
+       0.8529152419104896
+      ],
+      "worst_group_ci95": [
+       0.8053847854931446,
+       0.8372512162759841
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8566135976769801,
+      "mean_group_acc": 0.8540779765201364,
+      "worst_group_acc": 0.6187845303867403,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8164989939637827,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.8812572759022119,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7802197802197802,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9328859060402684,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9432203389830508,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9411764705882353,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6187845303867403,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8432272876352903,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8854875283446711,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8365628533434483,
+       0.8702813277321416
+      ],
+      "worst_group_ci95": [
+       0.5524861878453039,
+       0.6906077348066298
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    }
+   },
+   "round": 0
+  },
+  {
+   "feature_std_normalized": 0.019937651231884956,
+   "feature_erank": 85.90051813174601,
+   "n_probe_train": 9987,
+   "n_probe_test": 9987,
+   "tasks": {
+    "vru_present": {
+     "by_cond": {
+      "overall_acc": 0.8577150295384,
+      "mean_group_acc": 0.8219989021147479,
+      "worst_group_acc": 0.7424749163879598,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.891615878767913,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7976470588235294,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7982456140350878,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8854961832061069,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.8165137614678899,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.7424749163879598,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8084051449136083,
+       0.8344468790020135
+      ],
+      "worst_group_ci95": [
+       0.6888795986622074,
+       0.7927257525083613
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8577150295384,
+      "mean_group_acc": 0.8401132014333276,
+      "worst_group_acc": 0.7647058823529411,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.7755102040816326,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.9122736418511066,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7694994179278231,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7802197802197802,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7785234899328859,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8571428571428571,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.85,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.9459459459459459,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7647058823529411,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9226519337016574,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8150213184650705,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9098639455782312,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8214867751335984,
+       0.8595429607260607
+      ],
+      "worst_group_ci95": [
+       0.6274509803921569,
+       0.7742142025611176
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 9987
+    },
+    "vru_present@10pct": {
+     "by_cond": {
+      "overall_acc": 0.8045459096825873,
+      "mean_group_acc": 0.7717961312214044,
+      "worst_group_acc": 0.6321070234113713,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8384121232086971,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.74,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7631578947368421,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8931297709923665,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.7639699749791493,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6321070234113713,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7584674328735892,
+       0.7844231559240226
+      ],
+      "worst_group_ci95": [
+       0.5785117056856187,
+       0.68561872909699
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8045459096825873,
+      "mean_group_acc": 0.786656181227297,
+      "worst_group_acc": 0.6274509803921569,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.6530612244897959,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.854728370221328,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7054714784633295,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7802197802197802,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7718120805369127,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8042372881355933,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.6274509803921569,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9005524861878453,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.7566415218104297,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8667800453514739,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7684041072011673,
+       0.8103040805782286
+      ],
+      "worst_group_ci95": [
+       0.4897959183673469,
+       0.7058823529411765
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 998
+    },
+    "road_type": {
+     "by_cond": {
+      "overall_acc": 0.664764193451487,
+      "mean_group_acc": 0.6297199428992175,
+      "worst_group_acc": 0.4983277591973244,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.6865425794761983,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6347058823529412,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.6359649122807017,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.6755725190839694,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.6472060050041701,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.4983277591973244,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6115711836454969,
+       0.6450419738790365
+      ],
+      "worst_group_ci95": [
+       0.4479933110367893,
+       0.558695652173913
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.664764193451487,
+      "mean_group_acc": 0.6554486072129926,
+      "worst_group_acc": 0.4142857142857143,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.8163265306122449,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.6438631790744467,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5657741559953434,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4835164835164835,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7449664429530202,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.4142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6186440677966102,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5945945945945946,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.803921568627451,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7348066298342542,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.6510331256149557,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.7936507936507936,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6317631904352317,
+       0.6784534716885876
+      ],
+      "worst_group_ci95": [
+       0.31392857142857145,
+       0.5001373626373626
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 9987
+    },
+    "road_type@10pct": {
+     "by_cond": {
+      "overall_acc": 0.5808551116451387,
+      "mean_group_acc": 0.5539184768132549,
+      "worst_group_acc": 0.44816053511705684,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5947949267007083,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5752941176470588,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.5789473684210527,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.5725190839694656,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5537948290241869,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.44816053511705684,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5372502444883159,
+       0.5699981400479787
+      ],
+      "worst_group_ci95": [
+       0.3943979933110368,
+       0.5050167224080268
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5808551116451387,
+      "mean_group_acc": 0.5795017578545483,
+      "worst_group_acc": 0.35714285714285715,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.5714285714285714,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5774647887323944,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.7692307692307693,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.47846332945285214,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5054945054945055,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.6912751677852349,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.35714285714285715,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5466101694915254,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6574585635359116,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5578878320760905,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.6859410430839002,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5525443124954006,
+       0.6105887461312229
+      ],
+      "worst_group_ci95": [
+       0.2571428571428571,
+       0.4714285714285714
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 998
+    },
+    "traffic_density": {
+     "by_cond": {
+      "overall_acc": 0.5702413137078202,
+      "mean_group_acc": 0.6777461402257597,
+      "worst_group_acc": 0.5229780925712403,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5229780925712403,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6229411764705882,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.8070175438596491,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.9083969465648855,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5496246872393661,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6555183946488294,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6649596167715669,
+       0.6906400968936466
+      ],
+      "worst_group_ci95": [
+       0.509796573875803,
+       0.5335570746170317
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5702413137078202,
+      "mean_group_acc": 0.5967724860239677,
+      "worst_group_acc": 0.4897959183673469,
+      "worst_group": "CZ",
+      "groups": {
+       "CZ": {
+        "acc": 0.4897959183673469,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5356136820925553,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5087310826542492,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.5302013422818792,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8285714285714286,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6161016949152542,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.5882352941176471,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8729281767955801,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5647753361757953,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5912698412698413,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5735718402417397,
+       0.625224378371907
+      ],
+      "worst_group_ci95": [
+       0.3512410369553227,
+       0.5122526193247964
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "traffic_density@10pct": {
+     "by_cond": {
+      "overall_acc": 0.4935416040853109,
+      "mean_group_acc": 0.5955172907302108,
+      "worst_group_acc": 0.4551144786690825,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.4551144786690825,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5088235294117647,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7741228070175439,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8320610687022901,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.4778982485404504,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5250836120401338,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5807033962434489,
+       0.6096775815521189
+      ],
+      "worst_group_ci95": [
+       0.4397669247240982,
+       0.4682918794267831
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.4935416040853109,
+      "mean_group_acc": 0.5157285929204675,
+      "worst_group_acc": 0.38461538461538464,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5306122448979592,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.4458752515090543,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.4330616996507567,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.38461538461538464,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.47651006711409394,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7428571428571429,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5279661016949152,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5135135135135135,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.39215686274509803,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7071823204419889,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.4913086257789439,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5430839002267573,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.49027954307207244,
+       0.5372488026195344
+      ],
+      "worst_group_ci95": [
+       0.2549019607843137,
+       0.42273407616830205
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    },
+    "road_condition": {
+     "by_light": {
+      "overall_acc": 0.8874536897967358,
+      "mean_group_acc": 0.8792362715349229,
+      "worst_group_acc": 0.8642193719593101,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8942531711105358,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8642193719593101,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8720084886005576,
+       0.8868794224639732
+      ],
+      "worst_group_ci95": [
+       0.8518354710305175,
+       0.8792680229986732
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8874536897967358,
+      "mean_group_acc": 0.8792421851182949,
+      "worst_group_acc": 0.6408839779005525,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8663983903420523,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.9243306169965075,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7912087912087912,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9395973154362416,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7285714285714285,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9593220338983051,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.9459459459459459,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9803921568627451,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6408839779005525,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8717612331912102,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9024943310657596,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8631504264721466,
+       0.8939972016858995
+      ],
+      "worst_group_ci95": [
+       0.56353591160221,
+       0.7016574585635359
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "road_condition@10pct": {
+     "by_light": {
+      "overall_acc": 0.8561129468308801,
+      "mean_group_acc": 0.8422425675585166,
+      "worst_group_acc": 0.8168951791242813,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8675899559927518,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8168951791242813,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8336545701499259,
+       0.8515990817693074
+      ],
+      "worst_group_ci95": [
+       0.8000773993808049,
+       0.8323861123396727
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8561129468308801,
+      "mean_group_acc": 0.8541441747989262,
+      "worst_group_acc": 0.6132596685082873,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8233400402414487,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.8777648428405123,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8021978021978022,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.912751677852349,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9432203389830508,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9215686274509803,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6132596685082873,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.838635618235487,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8837868480725624,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8390532762995174,
+       0.8710706825045889
+      ],
+      "worst_group_ci95": [
+       0.5359116022099447,
+       0.6795580110497238
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    }
+   },
+   "round": 6
+  },
+  {
+   "feature_std_normalized": 0.019856058061122894,
+   "feature_erank": 80.47499847883547,
+   "n_probe_train": 9987,
+   "n_probe_test": 9987,
+   "tasks": {
+    "vru_present": {
+     "by_cond": {
+      "overall_acc": 0.8582156803844998,
+      "mean_group_acc": 0.8229594520751342,
+      "worst_group_acc": 0.745819397993311,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8926041838247406,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7941176470588235,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7960526315789473,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8893129770992366,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.8198498748957465,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.745819397993311,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8098266832497796,
+       0.8352144074942953
+      ],
+      "worst_group_ci95": [
+       0.6956521739130435,
+       0.7847370647255557
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8582156803844998,
+      "mean_group_acc": 0.8481722311746823,
+      "worst_group_acc": 0.7683352735739232,
+      "worst_group": "FR",
+      "groups": {
+       "CZ": {
+        "acc": 0.8163265306122449,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.9094567404426559,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7683352735739232,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7802197802197802,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7986577181208053,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8571428571428571,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8567796610169491,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.9459459459459459,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9392265193370166,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8163332240078714,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.905328798185941,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8284920292655852,
+       0.8657789600183518
+      ],
+      "worst_group_ci95": [
+       0.6470588235294118,
+       0.7777066356228173
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 9987
+    },
+    "vru_present@10pct": {
+     "by_cond": {
+      "overall_acc": 0.8051466906979072,
+      "mean_group_acc": 0.7735469768180255,
+      "worst_group_acc": 0.6421404682274248,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8394004282655246,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7358823529411764,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7587719298245614,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8969465648854962,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.76814011676397,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6421404682274248,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7602268261442793,
+       0.7869227377017523
+      ],
+      "worst_group_ci95": [
+       0.5985785953177258,
+       0.695819397993311
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8051466906979072,
+      "mean_group_acc": 0.7867636962831464,
+      "worst_group_acc": 0.6078431372549019,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.6938775510204082,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8482897384305835,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.7692307692307693,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7008149010477299,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8131868131868132,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7785234899328859,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.809322033898305,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8648648648648649,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.6078431372549019,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8950276243093923,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.7632010495244342,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8662131519274376,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7642788822503304,
+       0.810074443492173
+      ],
+      "worst_group_ci95": [
+       0.48970588235294116,
+       0.6927240977881257
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 998
+    },
+    "road_type": {
+     "by_cond": {
+      "overall_acc": 0.6674677080204265,
+      "mean_group_acc": 0.635149480427396,
+      "worst_group_acc": 0.5050167224080268,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.6886839070993247,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.638235294117647,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.6557017543859649,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.6793893129770993,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.6438698915763136,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5050167224080268,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6210143604963323,
+       0.6514699657596671
+      ],
+      "worst_group_ci95": [
+       0.4414715719063545,
+       0.5652173913043478
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.6674677080204265,
+      "mean_group_acc": 0.657957823915091,
+      "worst_group_acc": 0.4142857142857143,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.8367346938775511,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.6450704225352113,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5739231664726426,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7651006711409396,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.4142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6169491525423729,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5675675675675675,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7458563535911602,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.6530009839291571,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.7981859410430839,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6358870235019664,
+       0.6855826871214008
+      ],
+      "worst_group_ci95": [
+       0.3142857142857143,
+       0.4945054945054945
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 9987
+    },
+    "road_type@10pct": {
+     "by_cond": {
+      "overall_acc": 0.5797536797837188,
+      "mean_group_acc": 0.5517505774620061,
+      "worst_group_acc": 0.431438127090301,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5938066216438808,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5711764705882353,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.5789473684210527,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.5763358778625954,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5587989991659716,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.431438127090301,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5353900474691012,
+       0.5687465857378681
+      ],
+      "worst_group_ci95": [
+       0.37775919732441476,
+       0.4883779264214047
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5797536797837188,
+      "mean_group_acc": 0.5782112090297532,
+      "worst_group_acc": 0.37142857142857144,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.5714285714285714,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5830985915492958,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.7692307692307693,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.47846332945285214,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5164835164835165,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.6778523489932886,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.37142857142857144,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.538135593220339,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7647058823529411,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6629834254143646,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5605116431616923,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.6729024943310657,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5527461909106858,
+       0.6023588943818731
+      ],
+      "worst_group_ci95": [
+       0.2567857142857143,
+       0.45714285714285713
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 998
+    },
+    "traffic_density": {
+     "by_cond": {
+      "overall_acc": 0.5689396215079604,
+      "mean_group_acc": 0.6769952755925649,
+      "worst_group_acc": 0.5213309174765277,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5213309174765277,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6194117647058823,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.8114035087719298,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.9122137404580153,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5521267723102585,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6454849498327759,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.662937985530215,
+       0.6907275605516175
+      ],
+      "worst_group_ci95": [
+       0.5084829517377697,
+       0.5331905781584583
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5689396215079604,
+      "mean_group_acc": 0.600037993729393,
+      "worst_group_acc": 0.4945054945054945,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5306122448979592,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.53682092555332,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5157159487776485,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.5302013422818792,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8285714285714286,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6067796610169491,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.5882352941176471,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8784530386740331,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5621515250901935,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5878684807256236,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5757631176318575,
+       0.6244383130992894
+      ],
+      "worst_group_ci95": [
+       0.35164092664092667,
+       0.5133908064059404
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "traffic_density@10pct": {
+     "by_cond": {
+      "overall_acc": 0.492940823069991,
+      "mean_group_acc": 0.5912832191852716,
+      "worst_group_acc": 0.45577334870696756,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.45577334870696756,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5070588235294118,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7653508771929824,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8282442748091603,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.47956630525437866,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5117056856187291,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5789554300194413,
+       0.6067348614547857
+      ],
+      "worst_group_ci95": [
+       0.44456844012518526,
+       0.46813539779278535
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.492940823069991,
+      "mean_group_acc": 0.5181642207084355,
+      "worst_group_acc": 0.4065934065934066,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5918367346938775,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.4442655935613682,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.440046565774156,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4065934065934066,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.4697986577181208,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5228813559322034,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.4594594594594595,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.45098039215686275,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6961325966850829,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.48835683830764187,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5476190476190477,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.5555555555555556,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.49668012197855566,
+       0.5445724427551967
+      ],
+      "worst_group_ci95": [
+       0.2702702702702703,
+       0.4388993718737607
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    },
+    "road_condition": {
+     "by_light": {
+      "overall_acc": 0.8882547311504957,
+      "mean_group_acc": 0.8803797020531716,
+      "worst_group_acc": 0.8659885006634233,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.89477090344292,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8659885006634233,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8721197790123311,
+       0.8867459063138041
+      ],
+      "worst_group_ci95": [
+       0.8505086245024326,
+       0.8761609907120743
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8882547311504957,
+      "mean_group_acc": 0.8845957582038508,
+      "worst_group_acc": 0.6574585635359116,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8647887323943662,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.9266589057043073,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8021978021978022,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9328859060402684,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7428571428571429,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9584745762711865,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.972972972972973,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9803921568627451,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6574585635359116,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8734011151197114,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9030612244897959,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8701548165766341,
+       0.8978902586485884
+      ],
+      "worst_group_ci95": [
+       0.5964088397790056,
+       0.7183701657458564
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "road_condition@10pct": {
+     "by_light": {
+      "overall_acc": 0.8556122959847802,
+      "mean_group_acc": 0.8417625603043103,
+      "worst_group_acc": 0.816452896948253,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8670722236603676,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.816452896948253,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8329862709624635,
+       0.851419702314213
+      ],
+      "worst_group_ci95": [
+       0.8018354710305176,
+       0.832828394515701
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8556122959847802,
+      "mean_group_acc": 0.8506238281049586,
+      "worst_group_acc": 0.6022099447513812,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8221327967806841,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.8766006984866124,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8131868131868132,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9261744966442953,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7285714285714285,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9415254237288135,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.8823529411764706,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6022099447513812,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8396195473925877,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8832199546485261,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.836302309361772,
+       0.8660763686368441
+      ],
+      "worst_group_ci95": [
+       0.5414364640883977,
+       0.6629834254143646
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    }
+   },
+   "round": 12
+  },
+  {
+   "feature_std_normalized": 0.019784053787589073,
+   "feature_erank": 77.06199236693978,
+   "n_probe_train": 9987,
+   "n_probe_test": 9987,
+   "tasks": {
+    "vru_present": {
+     "by_cond": {
+      "overall_acc": 0.85741463903074,
+      "mean_group_acc": 0.8217847839578837,
+      "worst_group_acc": 0.745819397993311,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8926041838247406,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7917647058823529,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.793859649122807,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8893129770992366,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.817347789824854,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.745819397993311,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8051639378582723,
+       0.833867315141676
+      ],
+      "worst_group_ci95": [
+       0.7023411371237458,
+       0.7841470588235294
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.85741463903074,
+      "mean_group_acc": 0.8469333570190609,
+      "worst_group_acc": 0.7692307692307693,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.8163265306122449,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.9106639839034205,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7694994179278231,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7692307692307693,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7986577181208053,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8571428571428571,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8601694915254238,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.9459459459459459,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9337016574585635,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8110856018366678,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9064625850340136,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8285172880818371,
+       0.8638798862407125
+      ],
+      "worst_group_ci95": [
+       0.6666666666666666,
+       0.7776703049433163
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 9987
+    },
+    "vru_present@10pct": {
+     "by_cond": {
+      "overall_acc": 0.806748773405427,
+      "mean_group_acc": 0.7748064628160107,
+      "worst_group_acc": 0.6488294314381271,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8395651457749959,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.74,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.75,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8931297709923665,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.7773144286905754,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6488294314381271,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.762709653484751,
+       0.7882130732882181
+      ],
+      "worst_group_ci95": [
+       0.5852842809364549,
+       0.705685618729097
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.806748773405427,
+      "mean_group_acc": 0.7836327021237359,
+      "worst_group_acc": 0.5882352941176471,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.7142857142857143,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8527162977867203,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7043073341094296,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8021978021978022,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7516778523489933,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8135593220338984,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8648648648648649,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.5882352941176471,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8839779005524862,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.7677927189242375,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8599773242630385,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7609100222235461,
+       0.8063849358925729
+      ],
+      "worst_group_ci95": [
+       0.47058823529411764,
+       0.7058823529411765
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 998
+    },
+    "road_type": {
+     "by_cond": {
+      "overall_acc": 0.6649644537899269,
+      "mean_group_acc": 0.6311358715469486,
+      "worst_group_acc": 0.5050167224080268,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.6876956020424971,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6335294117647059,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.6600877192982456,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.6641221374045801,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.6363636363636364,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5050167224080268,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6165946918179572,
+       0.6455715846438806
+      ],
+      "worst_group_ci95": [
+       0.45811036789297654,
+       0.5486622073578595
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.6649644537899269,
+      "mean_group_acc": 0.6567992659874443,
+      "worst_group_acc": 0.4,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.8571428571428571,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.6382293762575453,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5657741559953434,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4725274725274725,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7516778523489933,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.4,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.614406779661017,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5945945945945946,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7513812154696132,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.6556247950147589,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.7959183673469388,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6370063656368841,
+       0.6804191157533584
+      ],
+      "worst_group_ci95": [
+       0.2857142857142857,
+       0.47145604395604396
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 9987
+    },
+    "road_type@10pct": {
+     "by_cond": {
+      "overall_acc": 0.579052768599179,
+      "mean_group_acc": 0.5502161281078992,
+      "worst_group_acc": 0.4180602006688963,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5951243617196508,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5670588235294117,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.581140350877193,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.5877862595419847,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5521267723102585,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.4180602006688963,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5371977264106945,
+       0.5668483256103531
+      ],
+      "worst_group_ci95": [
+       0.36789297658862874,
+       0.4885451505016723
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.579052768599179,
+      "mean_group_acc": 0.5784191895795993,
+      "worst_group_acc": 0.35714285714285715,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.5918367346938775,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5947686116700202,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.470314318975553,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.6845637583892618,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.35714285714285715,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.535593220338983,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5675675675675675,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7843137254901961,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6353591160220995,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5532961626762873,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.6717687074829932,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5554814347487026,
+       0.6015686554031877
+      ],
+      "worst_group_ci95": [
+       0.24285714285714285,
+       0.4431652253450857
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 998
+    },
+    "traffic_density": {
+     "by_cond": {
+      "overall_acc": 0.5702413137078202,
+      "mean_group_acc": 0.6801040258598204,
+      "worst_group_acc": 0.5210014824575853,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5210014824575853,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6229411764705882,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.8201754385964912,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.9122137404580153,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5554628857381151,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6488294314381271,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6665974100786978,
+       0.693844802059408
+      ],
+      "worst_group_ci95": [
+       0.5078240816998847,
+       0.5313992752429583
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5702413137078202,
+      "mean_group_acc": 0.5985193619111753,
+      "worst_group_acc": 0.4945054945054945,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.5306122448979592,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5420523138832998,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5157159487776485,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4945054945054945,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.5234899328859061,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8428571428571429,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6135593220338983,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.5490196078431373,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8839779005524862,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5631354542472942,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5827664399092971,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5762463110723213,
+       0.6237835837492016
+      ],
+      "worst_group_ci95": [
+       0.37359943977591037,
+       0.5102040816326531
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "traffic_density@10pct": {
+     "by_cond": {
+      "overall_acc": 0.49804746170021025,
+      "mean_group_acc": 0.592193019512215,
+      "worst_group_acc": 0.46186789655740407,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.46186789655740407,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5141176470588236,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7631578947368421,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8244274809160306,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.4845704753961635,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5050167224080268,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5775566136580722,
+       0.6082057812869656
+      ],
+      "worst_group_ci95": [
+       0.44464882943143813,
+       0.4737522648657552
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.49804746170021025,
+      "mean_group_acc": 0.5225309327411687,
+      "worst_group_acc": 0.4117647058823529,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.6122448979591837,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.447887323943662,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.43888242142025613,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4175824175824176,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.47651006711409394,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.6857142857142857,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5432203389830509,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.4864864864864865,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.4117647058823529,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7071823204419889,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.4913086257789439,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5515873015873016,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.5555555555555556,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.49637409583269254,
+       0.5450289367408547
+      ],
+      "worst_group_ci95": [
+       0.2549019607843137,
+       0.4354481955762515
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    },
+    "road_condition": {
+     "by_light": {
+      "overall_acc": 0.8889556423350355,
+      "mean_group_acc": 0.8813019914834062,
+      "worst_group_acc": 0.8673153471915082,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8952886357753042,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8673153471915082,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8733719789740221,
+       0.8888481398731407
+      ],
+      "worst_group_ci95": [
+       0.8518133569217161,
+       0.8814904909332153
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8889556423350355,
+      "mean_group_acc": 0.8865079418465945,
+      "worst_group_acc": 0.6408839779005525,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8631790744466801,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.9313154831199069,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8131868131868132,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9395973154362416,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7571428571428571,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9593220338983051,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.972972972972973,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9803921568627451,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6408839779005525,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8730731387340112,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.9070294784580499,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8730225168110747,
+       0.8992183325567942
+      ],
+      "worst_group_ci95": [
+       0.5580110497237569,
+       0.7016574585635359
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "road_condition@10pct": {
+     "by_light": {
+      "overall_acc": 0.8538099529388204,
+      "mean_group_acc": 0.839502690731183,
+      "worst_group_acc": 0.8133569217160549,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8656484597463111,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8133569217160549,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8309243070635887,
+       0.8478066294640532
+      ],
+      "worst_group_ci95": [
+       0.7969814241486067,
+       0.8270897832817337
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8538099529388204,
+      "mean_group_acc": 0.8476747682953057,
+      "worst_group_acc": 0.5966850828729282,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8201207243460764,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.8742724097788126,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8021978021978022,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9328859060402684,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9415254237288135,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8648648648648649,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9215686274509803,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.5966850828729282,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8392915710068874,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8786848072562359,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8284212407330642,
+       0.8648747614604152
+      ],
+      "worst_group_ci95": [
+       0.5302486187845303,
+       0.6714936858721389
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    }
+   },
+   "round": 18
+  },
+  {
+   "feature_std_normalized": 0.01974959671497345,
+   "feature_erank": 73.35637590949996,
+   "n_probe_train": 9987,
+   "n_probe_test": 9987,
+   "tasks": {
+    "vru_present": {
+     "by_cond": {
+      "overall_acc": 0.85741463903074,
+      "mean_group_acc": 0.8190513067919932,
+      "worst_group_acc": 0.7357859531772575,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8932630538626256,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7929411764705883,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7894736842105263,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8854961832061069,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.817347789824854,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.7357859531772575,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.805844940949358,
+       0.8319045684001618
+      ],
+      "worst_group_ci95": [
+       0.6855351170568562,
+       0.7793478260869566
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.85741463903074,
+      "mean_group_acc": 0.8540718671864355,
+      "worst_group_acc": 0.7692307692307693,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.8163265306122449,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.9118712273641851,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.770663562281723,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7692307692307693,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.8053691275167785,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8714285714285714,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8593220338983051,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.972972972972973,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.8235294117647058,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.9337016574585635,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8091177435224663,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.905328798185941,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.835502915554381,
+       0.8706862893693956
+      ],
+      "worst_group_ci95": [
+       0.6590659340659341,
+       0.7858847497089639
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 9987
+    },
+    "vru_present@10pct": {
+     "by_cond": {
+      "overall_acc": 0.8093521578051467,
+      "mean_group_acc": 0.7741503919798344,
+      "worst_group_acc": 0.6321070234113713,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.8425300609454786,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.7411764705882353,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7587719298245614,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8854961832061069,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.7848206839032527,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6321070234113713,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7606348373132337,
+       0.7872615021902244
+      ],
+      "worst_group_ci95": [
+       0.5752508361204013,
+       0.689046822742475
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8093521578051467,
+      "mean_group_acc": 0.7878155601965974,
+      "worst_group_acc": 0.6078431372549019,
+      "worst_group": "NL",
+      "groups": {
+       "CZ": {
+        "acc": 0.6938775510204082,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8583501006036217,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.7171129220023282,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7912087912087912,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7651006711409396,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.8169491525423729,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8918918918918919,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.6078431372549019,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8839779005524862,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.7635290259101345,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8639455782312925,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.7626414061200838,
+       0.8080263135269793
+      ],
+      "worst_group_ci95": [
+       0.47058823529411764,
+       0.7058823529411765
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 2,
+     "n_fit": 998
+    },
+    "road_type": {
+     "by_cond": {
+      "overall_acc": 0.6632622409131872,
+      "mean_group_acc": 0.628445710831929,
+      "worst_group_acc": 0.49498327759197325,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.6840718168341294,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6352941176470588,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.6513157894736842,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.6603053435114504,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.6447039199332777,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.49498327759197325,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6130638775265227,
+       0.6478812279597495
+      ],
+      "worst_group_ci95": [
+       0.431438127090301,
+       0.5451505016722408
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.6632622409131872,
+      "mean_group_acc": 0.6539173752894932,
+      "worst_group_acc": 0.35714285714285715,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.8367346938775511,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.6398390342052314,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.8461538461538461,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5518044237485448,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5164835164835165,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.7449664429530202,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.35714285714285715,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6135593220338983,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.6216216216216216,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7647058823529411,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7513812154696132,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.6539849130862578,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.7947845804988662,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.7777777777777778,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.6328284716064037,
+       0.6757481772467567
+      ],
+      "worst_group_ci95": [
+       0.2571428571428571,
+       0.4714285714285714
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 9987
+    },
+    "road_type@10pct": {
+     "by_cond": {
+      "overall_acc": 0.5735456092920797,
+      "mean_group_acc": 0.5481855959409594,
+      "worst_group_acc": 0.4280936454849498,
+      "worst_group": "wet/night",
+      "groups": {
+       "normal/day": {
+        "acc": 0.588865096359743,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5588235294117647,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.5767543859649122,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.5877862595419847,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.548790658882402,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.4280936454849498,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5312646082500985,
+       0.5662124746564986
+      ],
+      "worst_group_ci95": [
+       0.36780936454849494,
+       0.4816053511705686
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5735456092920797,
+      "mean_group_acc": 0.5757446138847802,
+      "worst_group_acc": 0.35714285714285715,
+      "worst_group": "IE",
+      "groups": {
+       "CZ": {
+        "acc": 0.5714285714285714,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.5883299798792756,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.46565774155995343,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5164835164835165,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.6644295302013423,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.35714285714285715,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5322033898305085,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5945945945945946,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.7647058823529411,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6408839779005525,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5464086585765825,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.6666666666666666,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.8888888888888888,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5487360576645025,
+       0.6006171385238503
+      ],
+      "worst_group_ci95": [
+       0.2571428571428571,
+       0.4571520039913521
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 5,
+     "n_fit": 998
+    },
+    "traffic_density": {
+     "by_cond": {
+      "overall_acc": 0.5699409232001602,
+      "mean_group_acc": 0.681122765335723,
+      "worst_group_acc": 0.5205073299291715,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.5205073299291715,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.6217647058823529,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.8267543859649122,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.9083969465648855,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.5537948290241869,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.6555183946488294,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.66826860036561,
+       0.6945642971607814
+      ],
+      "worst_group_ci95": [
+       0.5081329270301433,
+       0.5330340965244605
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5699409232001602,
+      "mean_group_acc": 0.6035707533759402,
+      "worst_group_acc": 0.5157159487776485,
+      "worst_group": "FR",
+      "groups": {
+       "CZ": {
+        "acc": 0.5306122448979592,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.544466800804829,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.5157159487776485,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.5164835164835165,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.5167785234899329,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.8428571428571429,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.6110169491525423,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.5405405405405406,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.6078431372549019,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.8729281767955801,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.5608396195473926,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5827664399092971,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5802712461991291,
+       0.6291585679406418
+      ],
+      "worst_group_ci95": [
+       0.35135135135135137,
+       0.5195675918139805
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "traffic_density@10pct": {
+     "by_cond": {
+      "overall_acc": 0.5034544908380895,
+      "mean_group_acc": 0.603909036169684,
+      "worst_group_acc": 0.4664799868225992,
+      "worst_group": "normal/day",
+      "groups": {
+       "normal/day": {
+        "acc": 0.4664799868225992,
+        "n": 6071
+       },
+       "normal/night": {
+        "acc": 0.5164705882352941,
+        "n": 1700
+       },
+       "snow/day": {
+        "acc": 0.7785087719298246,
+        "n": 456
+       },
+       "snow/night": {
+        "acc": 0.8473282442748091,
+        "n": 262
+       },
+       "wet/day": {
+        "acc": 0.48623853211009177,
+        "n": 1199
+       },
+       "wet/night": {
+        "acc": 0.5284280936454849,
+        "n": 299
+       }
+      },
+      "n_groups_eval": 6,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.589882477199062,
+       0.6191360881973244
+      ],
+      "worst_group_ci95": [
+       0.452619008400593,
+       0.4758812386756712
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.5034544908380895,
+      "mean_group_acc": 0.5302660110312757,
+      "worst_group_acc": 0.4065934065934066,
+      "worst_group": "GB",
+      "groups": {
+       "CZ": {
+        "acc": 0.6530612244897959,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.4507042253521127,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 1.0,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.4528521536670547,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.4065934065934066,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.436241610738255,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.5440677966101695,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.4864864864864865,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.45098039215686275,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.7071823204419889,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.4932764840931453,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.5674603174603174,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 0.6666666666666666,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.5037043743357801,
+       0.5526208183808505
+      ],
+      "worst_group_ci95": [
+       0.2857142857142857,
+       0.4395975855130785
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    },
+    "road_condition": {
+     "by_light": {
+      "overall_acc": 0.8887553819965955,
+      "mean_group_acc": 0.8805468602144456,
+      "worst_group_acc": 0.865546218487395,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8955475019414962,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.865546218487395,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8722105954116458,
+       0.8881294392084123
+      ],
+      "worst_group_ci95": [
+       0.8487284387439186,
+       0.8783834586466166
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8887553819965955,
+      "mean_group_acc": 0.8893289048599698,
+      "worst_group_acc": 0.6519337016574586,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.861569416498994,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.9336437718277066,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.8571428571428571,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9328859060402684,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7428571428571429,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9584745762711865,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.972972972972973,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9803921568627451,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.6519337016574586,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8707773040341096,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.909297052154195,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8733468193459065,
+       0.9037328193392007
+      ],
+      "worst_group_ci95": [
+       0.580110497237569,
+       0.7128453038674033
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 9987
+    },
+    "road_condition@10pct": {
+     "by_light": {
+      "overall_acc": 0.8519074797236408,
+      "mean_group_acc": 0.8363959818841771,
+      "worst_group_acc": 0.8080495356037152,
+      "worst_group": "night",
+      "groups": {
+       "day": {
+        "acc": 0.8647424281646389,
+        "n": 7726
+       },
+       "night": {
+        "acc": 0.8080495356037152,
+        "n": 2261
+       }
+      },
+      "n_groups_eval": 2,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8293841836092721,
+       0.8459396724478584
+      ],
+      "worst_group_ci95": [
+       0.7938965059708094,
+       0.8244139761167625
+      ]
+     },
+     "by_country": {
+      "overall_acc": 0.8519074797236408,
+      "mean_group_acc": 0.8444286395552792,
+      "worst_group_acc": 0.56353591160221,
+      "worst_group": "NO",
+      "groups": {
+       "CZ": {
+        "acc": 1.0,
+        "n": 49
+       },
+       "DE": {
+        "acc": 0.8169014084507042,
+        "n": 2485
+       },
+       "FI": {
+        "acc": 0.9230769230769231,
+        "n": 13
+       },
+       "FR": {
+        "acc": 0.8742724097788126,
+        "n": 859
+       },
+       "GB": {
+        "acc": 0.7582417582417582,
+        "n": 91
+       },
+       "HU": {
+        "acc": 0.9395973154362416,
+        "n": 149
+       },
+       "IE": {
+        "acc": 0.7142857142857143,
+        "n": 70
+       },
+       "IT": {
+        "acc": 0.9449152542372882,
+        "n": 1180
+       },
+       "LU": {
+        "acc": 0.8648648648648649,
+        "n": 37
+       },
+       "NL": {
+        "acc": 0.9411764705882353,
+        "n": 51
+       },
+       "NO": {
+        "acc": 0.56353591160221,
+        "n": 181
+       },
+       "PL": {
+        "acc": 0.8366677599212856,
+        "n": 3049
+       },
+       "SE": {
+        "acc": 0.8786848072562359,
+        "n": 1764
+       },
+       "SK": {
+        "acc": 1.0,
+        "n": 9
+       }
+      },
+      "n_groups_eval": 12,
+      "min_n": 30,
+      "mean_group_ci95": [
+       0.8288881277500348,
+       0.8615538031173081
+      ],
+      "worst_group_ci95": [
+       0.49157458563535916,
+       0.6353591160220995
+      ]
+     },
+     "n_test": 9987,
+     "n_classes": 3,
+     "n_fit": 998
+    }
+   },
+   "round": 24
+  }
+ ],
+ "totals": {
+  "frames_seen": 79845,
+  "frames_trained_on": 79845,
+  "sgd_steps": 2509,
+  "bytes_communicated": 5109923840,
+  "seconds": 1578.5608701705933
+ },
+ "hardware": {
+  "provider": "kaggle",
+  "gpu": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "platform": "Linux-6.18.48+-x86_64-with-glibc2.39"
+ }
+}

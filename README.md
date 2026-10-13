@@ -20,7 +20,11 @@ for the **worst group**.
 **Stage 2, the generation gap.** Generation A (ResNet-18, full camera) is trained federated with labels. Generation B (a smaller
 MobileNet, lower resolution, narrower view) and generation C (smaller still, 8-bit weights) cannot take A's weights. Knowledge
 crosses as predictions: the old model runs inside the new car on its own frames (teacher-in-the-car), or on a small shared
-public set. A rarity-aware version weights rare conditions up. Chains A -> B -> C play the telephone game.
+public set. A rarity-aware version weights rare conditions up. Chains A -> B -> C play the telephone game, and knowledge
+is also sent back from the small models to A (reverse transfer).
+
+**Follow-ups on stage 1.** Two other aggregation rules (L-DAWA, FedEMA) and four ways of adapting less (train only the last
+block, pull towards the starting weights, mix adapted and starting weights) test whether the cost of adapting can be avoided.
 
 ## Results
 
@@ -44,6 +48,12 @@ Data: 100,000 ZOD frames, 14 countries; stream 80,026, probe-train 9,987, probe-
 
 | run | seeds | overall acc | mean-group acc | worst-group acc | max forgetting | frames trained on |
 |---|---|---|---|---|---|---|
+| anchor01_all | 5 | 0.858 ± 0.001 | 0.821 ± 0.002 | 0.745 ± 0.009 | 0.016 ± 0.007 | 79845 |
+| anchor01_random20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.744 ± 0.004 | 0.006 ± 0.002 | 16207 |
+| anchor10_all | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.741 ± 0.002 | 0.004 ± 0.001 | 79845 |
+| anchor10_random20 | 5 | 0.857 ± 0.000 | 0.820 ± 0.000 | 0.738 ± 0.001 | 0.005 ± 0.002 | 16207 |
+| anchor1_all | 5 | 0.859 ± 0.000 | 0.824 ± 0.001 | 0.751 ± 0.006 | 0.007 ± 0.003 | 79845 |
+| anchor1_random20 | 5 | 0.857 ± 0.001 | 0.822 ± 0.002 | 0.745 ± 0.006 | 0.005 ± 0.002 | 16207 |
 | balanced_all | 5 | 0.858 ± 0.000 | 0.821 ± 0.001 | 0.744 ± 0.006 | 0.014 ± 0.002 | 79845 |
 | balanced_loss20 | 5 | 0.857 ± 0.001 | 0.822 ± 0.001 | 0.742 ± 0.007 | 0.006 ± 0.003 | 16207 |
 | balanced_novelty20 | 5 | 0.857 ± 0.001 | 0.822 ± 0.002 | 0.743 ± 0.008 | 0.006 ± 0.002 | 16207 |
@@ -55,10 +65,32 @@ Data: 100,000 ZOD frames, 14 countries; stream 80,026, probe-train 9,987, probe-
 | fedavg_novelty20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.002 | 0.743 ± 0.007 | 0.005 ± 0.002 | 16207 |
 | fedavg_random20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.745 ± 0.004 | 0.004 ± 0.002 | 16207 |
 | fedavg_rarity20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.745 ± 0.005 | 0.005 ± 0.001 | 16207 |
+| fedema_all | 5 | 0.858 ± 0.000 | 0.821 ± 0.001 | 0.745 ± 0.008 | 0.015 ± 0.005 | 79845 |
+| fedema_random20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.746 ± 0.006 | 0.005 ± 0.002 | 16207 |
 | init | 5 | 0.856 ± 0.000 | 0.820 ± 0.000 | 0.742 ± 0.000 | n/a | 0 |
+| layer4only_all | 5 | 0.857 ± 0.001 | 0.824 ± 0.001 | 0.755 ± 0.007 | 0.005 ± 0.003 | 79845 |
+| layer4only_random20 | 5 | 0.857 ± 0.000 | 0.819 ± 0.000 | 0.740 ± 0.002 | 0.005 ± 0.000 | 16207 |
+| ldawa_all | 5 | 0.858 ± 0.001 | 0.821 ± 0.002 | 0.746 ± 0.009 | 0.014 ± 0.003 | 79845 |
+| ldawa_norm_all | 5 | 0.858 ± 0.001 | 0.821 ± 0.003 | 0.748 ± 0.010 | 0.013 ± 0.003 | 79845 |
+| ldawa_norm_random20 | 5 | 0.857 ± 0.001 | 0.822 ± 0.001 | 0.744 ± 0.004 | 0.005 ± 0.002 | 16207 |
+| ldawa_random20 | 5 | 0.857 ± 0.000 | 0.822 ± 0.001 | 0.744 ± 0.004 | 0.005 ± 0.003 | 16207 |
+| tax_all | 5 | 0.858 ± 0.001 | 0.821 ± 0.002 | 0.745 ± 0.007 | 0.013 ± 0.002 | 79845 |
+| tax_all+interp0.25 | 5 | 0.857 ± 0.000 | 0.823 ± 0.001 | 0.744 ± 0.002 | 0.001 ± 0.000 | 79845 |
+| tax_all+interp0.5 | 5 | 0.858 ± 0.001 | 0.823 ± 0.002 | 0.749 ± 0.005 | 0.004 ± 0.002 | 79845 |
+| tax_all+interp0.75 | 5 | 0.859 ± 0.001 | 0.824 ± 0.002 | 0.748 ± 0.006 | 0.006 ± 0.004 | 79845 |
+| tax_random20 | 5 | 0.857 ± 0.001 | 0.822 ± 0.002 | 0.745 ± 0.006 | 0.005 ± 0.001 | 16207 |
+| tax_random20+interp0.25 | 5 | 0.857 ± 0.000 | 0.820 ± 0.001 | 0.740 ± 0.002 | 0.002 ± 0.002 | 16207 |
+| tax_random20+interp0.5 | 5 | 0.857 ± 0.000 | 0.820 ± 0.001 | 0.739 ± 0.002 | 0.004 ± 0.002 | 16207 |
+| tax_random20+interp0.75 | 5 | 0.857 ± 0.000 | 0.821 ± 0.001 | 0.740 ± 0.004 | 0.004 ± 0.002 | 16207 |
 
 Worst-group accuracy, difference against `fedavg_random20` (paired by seed):
 
+- `anchor01_all`: +0.000 (95% CI -0.009 to +0.009, n=5 seeds)
+- `anchor01_random20`: -0.001 (95% CI -0.003 to +0.001, n=5 seeds)
+- `anchor10_all`: -0.004 (95% CI -0.007 to -0.001, n=5 seeds)
+- `anchor10_random20`: -0.007 (95% CI -0.011 to -0.003, n=5 seeds)
+- `anchor1_all`: +0.005 (95% CI -0.004 to +0.014, n=5 seeds)
+- `anchor1_random20`: +0.000 (95% CI -0.005 to +0.005, n=5 seeds)
 - `balanced_all`: -0.001 (95% CI -0.008 to +0.005, n=5 seeds)
 - `balanced_loss20`: -0.003 (95% CI -0.009 to +0.003, n=5 seeds)
 - `balanced_novelty20`: -0.002 (95% CI -0.008 to +0.004, n=5 seeds)
@@ -69,7 +101,23 @@ Worst-group accuracy, difference against `fedavg_random20` (paired by seed):
 - `fedavg_loss20`: -0.003 (95% CI -0.011 to +0.005, n=5 seeds)
 - `fedavg_novelty20`: -0.002 (95% CI -0.007 to +0.003, n=5 seeds)
 - `fedavg_rarity20`: +0.000 (95% CI -0.003 to +0.003, n=5 seeds)
+- `fedema_all`: +0.000 (95% CI -0.007 to +0.007, n=5 seeds)
+- `fedema_random20`: +0.001 (95% CI -0.003 to +0.004, n=5 seeds)
 - `init`: -0.003 (95% CI -0.007 to +0.002, n=5 seeds)
+- `layer4only_all`: +0.009 (95% CI +0.004 to +0.015, n=5 seeds)
+- `layer4only_random20`: -0.005 (95% CI -0.011 to +0.002, n=5 seeds)
+- `ldawa_all`: +0.001 (95% CI -0.006 to +0.009, n=5 seeds)
+- `ldawa_norm_all`: +0.003 (95% CI -0.006 to +0.012, n=5 seeds)
+- `ldawa_norm_random20`: -0.001 (95% CI -0.004 to +0.001, n=5 seeds)
+- `ldawa_random20`: -0.001 (95% CI -0.003 to +0.001, n=5 seeds)
+- `tax_all`: +0.000 (95% CI -0.007 to +0.007, n=5 seeds)
+- `tax_all+interp0.25`: -0.001 (95% CI -0.006 to +0.003, n=5 seeds)
+- `tax_all+interp0.5`: +0.004 (95% CI -0.003 to +0.011, n=5 seeds)
+- `tax_all+interp0.75`: +0.003 (95% CI -0.005 to +0.012, n=5 seeds)
+- `tax_random20`: +0.000 (95% CI -0.005 to +0.005, n=5 seeds)
+- `tax_random20+interp0.25`: -0.005 (95% CI -0.009 to +0.000, n=5 seeds)
+- `tax_random20+interp0.5`: -0.006 (95% CI -0.009 to -0.003, n=5 seeds)
+- `tax_random20+interp0.75`: -0.005 (95% CI -0.007 to -0.002, n=5 seeds)
 
 Worst-group accuracy, `balanced` minus `fedavg` with the same frame selector (`vru_present`):
 
@@ -83,6 +131,12 @@ Worst-group accuracy, `balanced` minus `fedavg` with the same frame selector (`v
 
 | run | seeds | overall acc | mean-group acc | worst-group acc | max forgetting | frames trained on |
 |---|---|---|---|---|---|---|
+| anchor01_all | 5 | 0.807 ± 0.001 | 0.770 ± 0.003 | 0.633 ± 0.006 | 0.036 ± 0.006 | 79845 |
+| anchor01_random20 | 5 | 0.805 ± 0.001 | 0.776 ± 0.002 | 0.650 ± 0.004 | 0.020 ± 0.004 | 16207 |
+| anchor10_all | 5 | 0.805 ± 0.000 | 0.775 ± 0.001 | 0.656 ± 0.005 | 0.016 ± 0.006 | 79845 |
+| anchor10_random20 | 5 | 0.805 ± 0.001 | 0.777 ± 0.001 | 0.657 ± 0.007 | 0.015 ± 0.006 | 16207 |
+| anchor1_all | 5 | 0.807 ± 0.002 | 0.770 ± 0.003 | 0.628 ± 0.006 | 0.041 ± 0.006 | 79845 |
+| anchor1_random20 | 5 | 0.804 ± 0.001 | 0.776 ± 0.003 | 0.653 ± 0.003 | 0.018 ± 0.004 | 16207 |
 | balanced_all | 5 | 0.807 ± 0.001 | 0.770 ± 0.003 | 0.632 ± 0.006 | 0.037 ± 0.006 | 79845 |
 | balanced_loss20 | 5 | 0.804 ± 0.001 | 0.776 ± 0.001 | 0.656 ± 0.004 | 0.016 ± 0.006 | 16207 |
 | balanced_novelty20 | 5 | 0.804 ± 0.001 | 0.775 ± 0.001 | 0.655 ± 0.003 | 0.017 ± 0.002 | 16207 |
@@ -94,10 +148,32 @@ Worst-group accuracy, `balanced` minus `fedavg` with the same frame selector (`v
 | fedavg_novelty20 | 5 | 0.805 ± 0.001 | 0.776 ± 0.001 | 0.653 ± 0.003 | 0.019 ± 0.001 | 16207 |
 | fedavg_random20 | 5 | 0.804 ± 0.001 | 0.776 ± 0.002 | 0.649 ± 0.005 | 0.022 ± 0.006 | 16207 |
 | fedavg_rarity20 | 5 | 0.804 ± 0.001 | 0.775 ± 0.001 | 0.648 ± 0.004 | 0.023 ± 0.006 | 16207 |
+| fedema_all | 5 | 0.807 ± 0.001 | 0.771 ± 0.002 | 0.633 ± 0.013 | 0.036 ± 0.013 | 79845 |
+| fedema_random20 | 5 | 0.805 ± 0.001 | 0.775 ± 0.002 | 0.649 ± 0.005 | 0.022 ± 0.005 | 16207 |
 | init | 5 | 0.807 ± 0.000 | 0.779 ± 0.000 | 0.669 ± 0.000 | n/a | 0 |
+| layer4only_all | 5 | 0.808 ± 0.001 | 0.778 ± 0.001 | 0.650 ± 0.003 | 0.019 ± 0.003 | 79845 |
+| layer4only_random20 | 5 | 0.807 ± 0.001 | 0.780 ± 0.001 | 0.666 ± 0.003 | 0.006 ± 0.001 | 16207 |
+| ldawa_all | 5 | 0.807 ± 0.002 | 0.770 ± 0.003 | 0.630 ± 0.004 | 0.039 ± 0.004 | 79845 |
+| ldawa_norm_all | 5 | 0.807 ± 0.002 | 0.771 ± 0.003 | 0.634 ± 0.008 | 0.035 ± 0.008 | 79845 |
+| ldawa_norm_random20 | 5 | 0.805 ± 0.001 | 0.776 ± 0.002 | 0.649 ± 0.004 | 0.022 ± 0.006 | 16207 |
+| ldawa_random20 | 5 | 0.805 ± 0.001 | 0.776 ± 0.002 | 0.649 ± 0.004 | 0.021 ± 0.005 | 16207 |
+| tax_all | 5 | 0.807 ± 0.002 | 0.771 ± 0.003 | 0.634 ± 0.008 | 0.035 ± 0.008 | 79845 |
+| tax_all+interp0.25 | 5 | 0.805 ± 0.000 | 0.773 ± 0.001 | 0.639 ± 0.008 | 0.029 ± 0.008 | 79845 |
+| tax_all+interp0.5 | 5 | 0.806 ± 0.002 | 0.770 ± 0.004 | 0.629 ± 0.007 | 0.040 ± 0.007 | 79845 |
+| tax_all+interp0.75 | 5 | 0.806 ± 0.001 | 0.770 ± 0.002 | 0.635 ± 0.008 | 0.033 ± 0.008 | 79845 |
+| tax_random20 | 5 | 0.804 ± 0.001 | 0.775 ± 0.003 | 0.649 ± 0.005 | 0.022 ± 0.006 | 16207 |
+| tax_random20+interp0.25 | 5 | 0.806 ± 0.001 | 0.779 ± 0.001 | 0.666 ± 0.003 | 0.004 ± 0.002 | 16207 |
+| tax_random20+interp0.5 | 5 | 0.805 ± 0.001 | 0.777 ± 0.002 | 0.662 ± 0.006 | 0.008 ± 0.006 | 16207 |
+| tax_random20+interp0.75 | 5 | 0.805 ± 0.001 | 0.776 ± 0.001 | 0.655 ± 0.003 | 0.014 ± 0.003 | 16207 |
 
 Worst-group accuracy, difference against `fedavg_random20` (paired by seed):
 
+- `anchor01_all`: -0.016 (95% CI -0.026 to -0.006, n=5 seeds)
+- `anchor01_random20`: +0.001 (95% CI -0.001 to +0.004, n=5 seeds)
+- `anchor10_all`: +0.007 (95% CI -0.000 to +0.015, n=5 seeds)
+- `anchor10_random20`: +0.008 (95% CI +0.000 to +0.016, n=5 seeds)
+- `anchor1_all`: -0.021 (95% CI -0.026 to -0.015, n=5 seeds)
+- `anchor1_random20`: +0.004 (95% CI +0.001 to +0.007, n=5 seeds)
 - `balanced_all`: -0.017 (95% CI -0.023 to -0.010, n=5 seeds)
 - `balanced_loss20`: +0.007 (95% CI -0.001 to +0.015, n=5 seeds)
 - `balanced_novelty20`: +0.006 (95% CI +0.001 to +0.011, n=5 seeds)
@@ -108,7 +184,23 @@ Worst-group accuracy, difference against `fedavg_random20` (paired by seed):
 - `fedavg_loss20`: +0.002 (95% CI -0.000 to +0.004, n=5 seeds)
 - `fedavg_novelty20`: +0.004 (95% CI -0.001 to +0.009, n=5 seeds)
 - `fedavg_rarity20`: -0.001 (95% CI -0.006 to +0.005, n=5 seeds)
+- `fedema_all`: -0.016 (95% CI -0.031 to -0.001, n=5 seeds)
+- `fedema_random20`: +0.000 (95% CI -0.004 to +0.004, n=5 seeds)
 - `init`: +0.020 (95% CI +0.014 to +0.026, n=5 seeds)
+- `layer4only_all`: +0.001 (95% CI -0.008 to +0.010, n=5 seeds)
+- `layer4only_random20`: +0.017 (95% CI +0.011 to +0.023, n=5 seeds)
+- `ldawa_all`: -0.019 (95% CI -0.027 to -0.011, n=5 seeds)
+- `ldawa_norm_all`: -0.015 (95% CI -0.023 to -0.006, n=5 seeds)
+- `ldawa_norm_random20`: +0.001 (95% CI -0.004 to +0.005, n=5 seeds)
+- `ldawa_random20`: +0.001 (95% CI -0.001 to +0.003, n=5 seeds)
+- `tax_all`: -0.015 (95% CI -0.027 to -0.003, n=5 seeds)
+- `tax_all+interp0.25`: -0.009 (95% CI -0.019 to +0.001, n=5 seeds)
+- `tax_all+interp0.5`: -0.020 (95% CI -0.029 to -0.011, n=5 seeds)
+- `tax_all+interp0.75`: -0.013 (95% CI -0.019 to -0.008, n=5 seeds)
+- `tax_random20`: +0.000 (95% CI -0.005 to +0.005, n=5 seeds)
+- `tax_random20+interp0.25`: +0.017 (95% CI +0.011 to +0.023, n=5 seeds)
+- `tax_random20+interp0.5`: +0.013 (95% CI +0.008 to +0.017, n=5 seeds)
+- `tax_random20+interp0.75`: +0.006 (95% CI +0.001 to +0.011, n=5 seeds)
 
 Worst-group accuracy, `balanced` minus `fedavg` with the same frame selector (`vru_present@10pct`):
 
@@ -150,6 +242,31 @@ Gap closed on worst-group accuracy, (student - floor) / (oracle - floor), genera
 - s2_B_kd_incar: 0.659 ± 0.094 (n=5 seeds with a floor-oracle gap above 0.05)
 - s2_B_kd_incar_rarity: 0.682 ± 0.101 (n=5 seeds with a floor-oracle gap above 0.05)
 
+#### Reverse transfer: `vru_present`
+
+Accuracy by country group of the test frames (`vru_present`; gen1 = the old cars' own countries):
+
+| model | seeds | gen1 countries | gen2 countries | gen3 countries |
+|---|---|---|---|---|
+| rev_A_teacher | 5 | 0.843 ± 0.004 | 0.846 ± 0.007 | 0.862 ± 0.011 |
+| rev_A_from_control | 5 | 0.834 ± 0.006 | 0.838 ± 0.013 | 0.846 ± 0.010 |
+| rev_A_from_oracle | 5 | 0.775 ± 0.007 | 0.815 ± 0.009 | 0.839 ± 0.009 |
+| rev_A_from_ensemble | 5 | 0.847 ± 0.002 | 0.886 ± 0.005 | 0.871 ± 0.005 |
+| rev_B_oracle | 5 | 0.762 ± 0.008 | 0.831 ± 0.010 | 0.833 ± 0.004 |
+| rev_B_control | 5 | 0.827 ± 0.003 | 0.842 ± 0.007 | 0.848 ± 0.010 |
+
+Paired by seed, reverse-transferred A' minus the original A (95% CI):
+
+- rev_A_from_control, gen1: -0.009 (95% CI -0.012 to -0.006, n=5)
+- rev_A_from_control, gen2: -0.008 (95% CI -0.017 to +0.000, n=5)
+- rev_A_from_control, gen3: -0.016 (95% CI -0.020 to -0.011, n=5)
+- rev_A_from_oracle, gen1: -0.068 (95% CI -0.074 to -0.062, n=5)
+- rev_A_from_oracle, gen2: -0.031 (95% CI -0.039 to -0.023, n=5)
+- rev_A_from_oracle, gen3: -0.023 (95% CI -0.033 to -0.013, n=5)
+- rev_A_from_ensemble, gen1: +0.004 (95% CI +0.000 to +0.008, n=5)
+- rev_A_from_ensemble, gen2: +0.040 (95% CI +0.028 to +0.052, n=5)
+- rev_A_from_ensemble, gen3: +0.009 (95% CI -0.010 to +0.028, n=5)
+
 All tasks, per-country tables and every paired difference: [results/REPORT.md](results/REPORT.md).
 <!-- RESULTS:END -->
 
@@ -166,6 +283,16 @@ All tasks, per-country tables and every paired difference: [results/REPORT.md](r
 - Surprise-based selection (`loss`, `novelty`) did not increase forgetting compared with random selection.
 - Pooling all the data in one place was not reliably different from federating it (nominally a little better in the
   low-label probe, with an interval that includes zero). Both were clearly below the untrained backbone there.
+- **Better aggregation did not help.** L-DAWA (layer-wise cosine weighting) and FedEMA matched plain FedAvg to within 0.003 on
+  the low-label worst group, with and without frame selection. A possible reason (not tested) is that every client moves the
+  shared weights in a similar direction, so how the updates are averaged hardly matters.
+- **What did help was adapting less.** Low-label worst-group accuracy (5 seeds, `init` = 0.669): FedAvg on all frames 0.633,
+  on 20% of frames 0.649. Training only the last block (`layer4`) on 20% of frames gave 0.666, nearly back to `init`. An
+  L2 pull towards the starting weights helped a little and monotonically with its strength (mu 0.1 / 1 / 10 on 20% of frames:
+  0.650 / 0.653 / 0.657). Averaging the adapted weights with the starting weights (WiSE-FT style, 25% adapted) on 20% of
+  frames gave 0.666, again about `init`. The same interpolation on all frames did not help (0.639 / 0.629 / 0.635 at 25 / 50 /
+  75%). The best of these only recovers the untrained backbone; none beats it. Three interpolation weights were tried, so
+  that 0.666 is the best of three, not a pre-registered test.
 
 **Stage 2.**
 - On the headline task, a student that only sees the teacher's predictions on its own frames closed most of the gap between
@@ -180,6 +307,14 @@ All tasks, per-country tables and every paired difference: [results/REPORT.md](r
   same, it points to a limit of C's cheap camera (resolution, narrower view, 8-bit weights) and not to a failure of
   distillation. I did not check the predicted class counts, so this is an inference.
 - Rarity-aware distillation gave no consistent benefit.
+- **Reverse transfer (B back to A).** Distilling a single small student (B) back into the big model (A) did not improve A: on
+  `vru_present` it was 0.009 to 0.016 lower in accuracy in the old cars' countries and the newest countries (intervals exclude
+  zero). Distilling the *ensemble* of the later students into A was better: +0.040 (95% CI +0.028 to +0.052) in the
+  middle generation's countries, +0.004 and +0.009 elsewhere (intervals touch or include zero). So the small models
+  collectively carry something the old model lacks, only for the countries they were built for; a single student does
+  not. On other tasks the picture is mixed (road type improved in some country groups and fell in others; traffic density
+  fell in two of three), so I read this as a task-dependent result with one clear positive. A model distilled from true labels
+  of the new data (`rev_A_from_oracle`) forgot the old countries most (-0.068), which is the usual catastrophic-forgetting pattern.
 
 ## Limitations, stated plainly
 - The probes and stage-2 targets are image-level labels taken from ZOD's metadata (pedestrian visible, road type, traffic
@@ -193,7 +328,9 @@ All tasks, per-country tables and every paired difference: [results/REPORT.md](r
   stage-2 attempt had a diverged teacher and weak teachers; its results are archived on the Modal volume and are not
   reported. Details and numbers: `docs/BLUEPRINT.md`, ADR-8 to ADR-16.
 - Quantization is simulated (8-bit weights), and the "transition cars" carry both cameras so the teacher can read the old view.
-- Not done: FedEMA / L-DAWA aggregation, an ensemble of per-country teachers, transfer from B back to A, LiDAR, Sequences.
+- Not done: object detection, an ensemble of per-country teachers as the first teacher, LiDAR, Sequences.
+- The last 31 runs (phase-2 grid and reverse transfer) ran on Kaggle GPUs, the rest on Modal T4s; each result file records
+  its hardware. The same code and seeds were used, but small numeric differences between GPUs are possible.
 - Compared with published federated self-supervised work, this study uses real country-level non-IID data on 8 MP driving
   images, but at a small scale. I did not search for every related paper; see `literature_review.md`.
 
@@ -211,6 +348,9 @@ modal run --detach modal_app.py::stage2 --seeds 0,1,2,3,4       # stage 2
 modal volume get zod-data /results results_local
 python -m zodfl.readme_block --results results_local/results --readme README.md
 ```
+The phase-2 grid (`config/grid_phase2.toml`) and reverse transfer can also run on Kaggle (free GPUs, private datasets):
+`python -m zodfl.kaggle_bundle --username <you>` builds the code bundle and kernel; `kaggle_push.py` uploads the shards from
+Modal so nothing passes through a laptop; `kaggle/worker.py` runs the job list in `kaggle/jobs.json` and writes result files.
 Tests (synthetic data only, no GPU): `python -m pytest`.
 
 ## Layout
