@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 from .det_report import det_block
@@ -21,7 +22,19 @@ REGIMES = ("", "@10pct")          # full-label probe, low-label probe
 BASE_TAG = "fedavg_random20"
 
 
+KEY_STAGE1 = ["init", "fedavg_all", "fedavg_random20", "balanced_random20", "central_all", "ldawa_random20",
+              "fedema_random20", "layer4only_random20", "anchor10_random20", "tax_random20+interp0.25"]
+KEY_STAGE2 = ["s2_A_teacher", "s2_B_floor", "s2_B_oracle", "s2_B_kd_incar", "s2_C_kd_incar"]
+
+
+def _keep(text: str, starts: tuple[str, ...], drop: tuple[str, ...] = ()) -> str:
+    """Keep only the lines that start with one of `starts` (and contain none of `drop`); the README shows key rows only."""
+    kept = "\n".join(l for l in text.splitlines() if l.startswith(starts) and not any(d in l for d in drop))
+    return re.sub(r"(\|[^\n]*)\n(- )", r"\1\n\n\2", kept)           # a list right after a table needs a blank line
+
+
 def build_block(results_dir: str | Path) -> str:
+    """The short block shown in the README: key rows only. Every variant and task is in results/REPORT.md."""
     recs = load_records(results_dir)
     if not recs:
         raise FileNotFoundError(f"no result files in {results_dir}")
@@ -31,38 +44,25 @@ def build_block(results_dir: str | Path) -> str:
     summary = Path(results_dir) / "data_summary.json"
     if summary.exists():
         s = json.loads(summary.read_text())
-        out += [f"Data: {s['n_frames']:,} ZOD frames, {len(s['stream_by_country'])} countries; "
-                f"stream {s['split_counts'].get('stream', 0):,}, probe-train {s['split_counts'].get('probe_train', 0):,}, "
-                f"probe-test {s['split_counts'].get('probe_test', 0):,}.", "",
-                "| condition group | frames | probe-test frames |", "|---|---|---|"]
-        for c, n in sorted(s["frames_by_cond"].items(), key=lambda kv: -kv[1]):
-            out.append(f"| {c} | {n:,} | {s['probe_test_by_cond'].get(c, 0):,} |")
-        out.append("")
+        out += [f"Data: {s['n_frames']:,} ZOD frames, {len(s['stream_by_country'])} countries; stream {s['split_counts'].get('stream', 0):,}, "
+                f"probe-train {s['split_counts'].get('probe_train', 0):,}, probe-test {s['split_counts'].get('probe_test', 0):,}. "
+                f"Rarest groups: wet/night {s['frames_by_cond'].get('wet/night', 0):,} and snow/night "
+                f"{s['frames_by_cond'].get('snow/night', 0):,} frames.", ""]
     if stage1:
-        for reg in REGIMES:
-            task = PRIMARY + reg
-            label = "full-label probe" if not reg else "low-label probe (10% of probe-train)"
-            out += [f"#### Stage 1: `{task}`, {label}, groups = road condition x light", "",
-                    table(stage1, task, "by_cond"), ""]
-            tags = {r["tag"] for r in stage1}
-            if BASE_TAG in tags:
-                out.append(f"Worst-group accuracy, difference against `{BASE_TAG}` (paired by seed):")
-                out.append("")
-                for tag in sorted(tags - {BASE_TAG}):
-                    out.append(f"- `{tag}`: {paired_diff(stage1, task, 'by_cond', 'worst_group', BASE_TAG, tag)}")
-                out.append("")
-                if any(t.startswith("balanced_") for t in tags):
-                    out += [aggregator_pairs_md(stage1, task), ""]
+        task = PRIMARY + "@10pct"
+        keep = [r for r in stage1 if r["tag"] in KEY_STAGE1]
+        out += [f"**Stage 1** (`{task}`: low-label probe, 5 seeds; `init` = the pretrained model with no federated training). "
+                "Worst-group = the weakest road-condition x light group.", "", table(keep, task, "by_cond"), ""]
     if stage2:
-        out += [f"#### Stage 2 (generation gap): `{PRIMARY}`, groups = road condition x light", "",
-                retention_table(stage2, PRIMARY, "by_cond"), "", stage2_pairs_md(stage2, PRIMARY), "",
-                gap_closed_md(stage2, PRIMARY), ""]
+        keep2 = [r for r in stage2 if r["tag"] in KEY_STAGE2]
+        out += [f"**Stage 2, generation gap** (`{PRIMARY}`, 5 seeds).", "", retention_table(keep2, PRIMARY, "by_cond"), "",
+                _keep(gap_closed_md(stage2, PRIMARY), ("Gap closed", "- s2_B_kd_incar:")), ""]
     if reverse:
-        out += [f"#### Reverse transfer: `{PRIMARY}`", "", reverse_md(reverse, PRIMARY), ""]
+        out += [f"**Reverse transfer, B back to A** (`{PRIMARY}`).", "", _keep(reverse_md(reverse, PRIMARY), ("|", "- rev_A_from_ensemble", "- rev_A_from_control, gen2"), drop=("rev_B_", "rev_A_from_oracle")), ""]
     det = det_block(results_dir)
     if det:
         out += [det, ""]
-    out.append("All tasks, per-country tables and every paired difference: [results/REPORT.md](results/REPORT.md).")
+    out.append("Every variant, task, per-country table and paired difference: [results/REPORT.md](results/REPORT.md).")
     return "\n".join(out)
 
 

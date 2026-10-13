@@ -100,13 +100,7 @@ def det_block(results_dir: str | Path) -> str:
     recs = load_det(results_dir)
     if not recs:
         return ""
-    ex = next((r for r in recs if r["tag"] == "det_B_kd_incar"), None)
-    note = ""
-    if ex:
-        e = ex["extra"]
-        note = (f"\nPseudo-labels (seed {ex['seed']}): the teacher's boxes with score >= {e['threshold']} gave "
-                f"{e['pseudo_boxes']:,} boxes on frames that contain {e['true_boxes_in_those_frames']:,} true boxes.\n")
-    return "\n".join([
-        "#### Detection: Faster R-CNN, teacher A (ResNet-18) to student B (MobileNetV3), ZOD 2D boxes", "",
-        "COCO-style AP (IoU 0.50:0.95) on held-out test frames from all 12 countries, rare condition groups over-represented.",
-        "", main_table(recs), "", "AP by condition group:", "", group_table(recs), "", pairs_md(recs), gap_closed_det(recs), note])
+    first_pairs = pairs_md(recs).split("\n\n")[0]
+    head = ("**Detection** (Faster R-CNN, teacher A = ResNet-18, student B = MobileNetV3; ZOD 2D boxes; COCO-style AP on "
+            "held-out test frames, 3 seeds).")
+    return "\n".join([head, "", main_table(recs), "", first_pairs, ""])
