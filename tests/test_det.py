@@ -175,7 +175,9 @@ def test_detection_report_tables_and_pairs(tmp_path):
     recs = load_det(tmp_path)
     assert len(recs) == 15, "validation-split and variant runs must not enter the report"
     block = det_block(tmp_path)
-    assert "det_B_kd_incar" in block and "worst-group AP" in block and "wet/night (n=12)" in block
+    assert "det_B_kd_incar" in block and "worst-group AP" in block
+    from zodfl.det_report import group_table
+    assert "wet/night (n=12)" in group_table(recs)
     assert "`det_B_kd_incar` minus `det_B_floor`: +0.050 (95% CI" in block
     gap = gap_closed_det(recs)
     assert "det_B_kd_incar: 0.333" in gap and "det_B_kd_floor: 0.467" in gap

@@ -29,7 +29,8 @@ def test_readme_block_is_generated_and_inserted(world, cfg, tmp_path):
         for seed in (0, 1):
             save_record(run(c, df, store, seed=seed, device="cpu", tag=tag, log=lambda *_: None), tmp_path)
     block = build_block(tmp_path)
-    assert "vru_present@10pct" in block and "fedavg_loss20" in block and "95% CI" in block
+    assert "vru_present@10pct" in block and "fedavg_random20" in block and "fedavg_loss20" not in block, "README block shows key rows only"
+    assert "REPORT.md" in block
     readme = tmp_path / "README.md"
     readme.write_text(f"intro\n{START}\nold\n{END}\noutro\n")
     insert(readme, block)
