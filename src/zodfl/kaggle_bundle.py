@@ -8,7 +8,7 @@ build/kaggle_kernel (worker.py, kernel-metadata.json). Run the kaggle commands f
 mishandles a path containing a slash on Windows):
     cd build && kaggle datasets create -p kaggle_code -t          (first time)
     cd build && kaggle datasets version -p kaggle_code -m "update" -t   (later)
-    cd build && kaggle kernels push -p kaggle_kernel
+    cd build && kaggle kernels push -p kaggle_kernel          (or kaggle_det_kernel for the detection study)
 """
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SHARDS_SLUG, CODE_SLUG, KERNEL_SLUG = "zod-fssl-shards", "zodfl-code", "zod-fssl-remaining-runs"   # slug = title, as Kaggle derives it
+DET_STORE_SLUG, DET_KERNEL_SLUG = "zod-det-store", "zod-fssl-detection"
 ARCHIVE = "zodfl_code.tar.gz"
 
 
@@ -41,7 +42,14 @@ def kernel_metadata(user: str, gpu: bool = True) -> dict:
             "competition_sources": [], "kernel_sources": []}
 
 
-def build(user: str, out: Path | None = None, jobs_file: Path | None = None) -> dict:
+def det_kernel_metadata(user: str) -> dict:
+    return {"id": f"{user}/{DET_KERNEL_SLUG}", "title": "zod-fssl detection", "code_file": "det_worker.py",
+            "language": "python", "kernel_type": "script", "is_private": "true", "enable_gpu": "true",
+            "enable_internet": "false", "dataset_sources": [f"{user}/{DET_STORE_SLUG}", f"{user}/{CODE_SLUG}"],
+            "competition_sources": [], "kernel_sources": []}
+
+
+def build(user: str, out: Path | None = None, jobs_file: Path | None = None, det_jobs_file: Path | None = None) -> dict:
     if not valid_username(user):
         raise ValueError(f"suspicious Kaggle username {user!r}")
     out = out or ROOT / "build"
@@ -55,14 +63,25 @@ def build(user: str, out: Path | None = None, jobs_file: Path | None = None) -> 
     shutil.copytree(ROOT / "src" / "zodfl", stage / "src" / "zodfl", ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copytree(ROOT / "config", stage / "config")
     shutil.copy(jobs_file or ROOT / "kaggle" / "jobs.json", stage / "jobs.json")
+    det_jobs = det_jobs_file or ROOT / "kaggle" / "det_jobs.json"
+    names = ["src", "config", "jobs.json"]
+    if det_jobs.exists():
+        shutil.copy(det_jobs, stage / "det_jobs.json")
+        names.append("det_jobs.json")
     with tarfile.open(code / ARCHIVE, "w:gz") as tf:
-        for name in ("src", "config", "jobs.json"):
+        for name in names:
             tf.add(stage / name, arcname=name)
     shutil.rmtree(stage)
     (code / "dataset-metadata.json").write_text(json.dumps(code_metadata(user), indent=1))
     shutil.copy(ROOT / "kaggle" / "worker.py", kern / "worker.py")
     (kern / "kernel-metadata.json").write_text(json.dumps(kernel_metadata(user), indent=1))
-    return {"code": code, "kernel": kern, "archive": code / ARCHIVE}
+    det_kern = out / "kaggle_det_kernel"
+    if det_kern.exists():
+        shutil.rmtree(det_kern)
+    det_kern.mkdir(parents=True)
+    shutil.copy(ROOT / "kaggle" / "det_worker.py", det_kern / "det_worker.py")
+    (det_kern / "kernel-metadata.json").write_text(json.dumps(det_kernel_metadata(user), indent=1))
+    return {"code": code, "kernel": kern, "archive": code / ARCHIVE, "det_kernel": det_kern}
 
 
 def main() -> None:

@@ -2,6 +2,7 @@
 
     modal run kaggle_push.py::plan          # list what would be uploaded (no credentials needed, no upload)
     modal run kaggle_push.py::push_cli      # create (or version) the private dataset <you>/zod-fssl-shards
+    modal run kaggle_push.py::push_cli --which det   # the detection store <you>/zod-det-store
 
 Needs the Modal secret `kaggle-credentials` holding KAGGLE_USERNAME and either KAGGLE_KEY (kaggle.json style) or
 KAGGLE_API_TOKEN. Create it yourself with scripts/set_kaggle_secret.ps1 so the key never passes through anyone else.
@@ -18,19 +19,34 @@ SLUG = "zod-fssl-shards"
 WEIGHTS = ("resnet18-f37072fd.pth", "mobilenet_v3_small-047dcff4.pth")
 
 
-def dataset_meta(user: str) -> dict:
+DET_SLUG = "zod-det-store"
+
+
+def dataset_meta(user: str, which: str = "shards") -> dict:
     """Kaggle limits: title 6-50 characters, subtitle 20-80 characters."""
+    if which == "det":
+        return {"title": "ZOD 960x540 detection store", "id": f"{user}/{DET_SLUG}", "licenses": [{"name": "CC-BY-SA-4.0"}],
+                "subtitle": "ZOD frames at 960x540 (JPEG) with 2D boxes, plus pretrained weights",
+                "description": "Derived from the Zenseact Open Dataset (CC BY-SA 4.0), face/plate-blurred images, "
+                               "resized, with 2D box labels. Private; used by the zod-fssl detection study."}
     return {"title": "ZOD Frames shrunk for zod-fssl", "id": f"{user}/{SLUG}", "licenses": [{"name": "CC-BY-SA-4.0"}],
             "subtitle": "ZOD frames shrunk to 144x256 (uint8) with index and pretrained weights",
             "description": "Derived from the Zenseact Open Dataset (CC BY-SA 4.0), face/plate-blurred images, "
                            "resized. Private; used by the zod-fssl study."}
 
 
-def _files() -> list[tuple[str, str]]:
+def _files(which: str = "shards") -> list[tuple[str, str]]:
     """(name in the dataset, path on the volume). Flat on purpose: the Kaggle CLI skips sub-directories."""
     import glob
     import os
 
+    if which == "det":
+        out = [("det_images.bin", f"{D}/det/store/det_images.bin"), ("det_meta.parquet", f"{D}/det/store/det_meta.parquet")]
+        out += [(w, f"{D}/torch_cache/hub/checkpoints/{w}") for w in WEIGHTS]
+        missing = [n for n, p in out if not os.path.exists(p)]
+        if missing:
+            raise FileNotFoundError(f"missing on the volume: {missing}")
+        return out
     out = [(os.path.basename(p), p) for p in sorted(glob.glob(f"{D}/shards/shard_*.npy"))]
     out += [("manifest.json", f"{D}/shards/manifest.json"), ("index.parquet", f"{D}/index.parquet")]
     out += [(w, f"{D}/torch_cache/hub/checkpoints/{w}") for w in WEIGHTS]
@@ -94,7 +110,7 @@ def plan():
 
 @app.function(image=image, volumes={D: data}, secrets=[modal.Secret.from_name("kaggle-credentials")],
               cpu=2, memory=4096, timeout=4 * 3600)
-def push(link: bool = True):
+def push(link: bool = True, which: str = "shards"):
     import json
     import os
     import shutil
@@ -109,13 +125,13 @@ def push(link: bool = True):
         raise RuntimeError("the kaggle-credentials secret must contain KAGGLE_KEY or KAGGLE_API_TOKEN")
     print("authenticated with:", _authenticate())
     bundle = tempfile.mkdtemp(prefix="bundle_")
-    for name, src in _files():
+    for name, src in _files(which):
         dst = os.path.join(bundle, name)
         if link:
             os.symlink(src, dst)
         else:
             shutil.copy(src, dst)
-    meta = dataset_meta(user)
+    meta = dataset_meta(user, which)
     with open(os.path.join(bundle, "dataset-metadata.json"), "w") as fh:
         json.dump(meta, fh)
     cmd = ["kaggle", "datasets", "create", "-p", bundle, "-t", "-r", "skip"]
@@ -127,9 +143,9 @@ def push(link: bool = True):
         print(r.stdout[-1500:], r.stderr[-1500:])
     if r.returncode != 0:
         raise RuntimeError("kaggle CLI failed (see output above); if it mentions symlinks, rerun with --no-link")
-    return f"{user}/{SLUG}"
+    return meta["id"]
 
 
 @app.local_entrypoint()
-def push_cli(no_link: bool = False):
-    print(push.remote(link=not no_link))
+def push_cli(no_link: bool = False, which: str = "shards"):
+    print(push.remote(link=not no_link, which=which))

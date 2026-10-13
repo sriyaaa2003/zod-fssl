@@ -116,3 +116,24 @@ def test_kernel_slug_matches_the_slug_kaggle_derives_from_the_title():
     km = kernel_metadata("saf2003")
     slug_from_title = re.sub(r"[^a-z0-9]+", "-", km["title"].lower()).strip("-")
     assert km["id"] == f"saf2003/{slug_from_title}"
+
+
+def test_detection_kernel_slug_and_inputs():
+    import re
+
+    from zodfl.kaggle_bundle import det_kernel_metadata
+    km = det_kernel_metadata("saf2003")
+    assert km["id"] == "saf2003/" + re.sub(r"[^a-z0-9]+", "-", km["title"].lower()).strip("-")
+    assert km["dataset_sources"] == ["saf2003/zod-det-store", "saf2003/zodfl-code"]
+    assert km["enable_internet"] == "false" and km["is_private"] == "true" and km["code_file"] == "det_worker.py"
+
+
+def test_build_adds_detection_job_and_kernel(tmp_path):
+    jobs = tmp_path / "jobs.json"
+    jobs.write_text(json.dumps([{"kind": "reverse", "seed": 0}]))
+    dj = tmp_path / "det_jobs.json"
+    dj.write_text(json.dumps({"seeds": [0], "split": "val"}))
+    info = build("saf2003", out=tmp_path / "b", jobs_file=jobs, det_jobs_file=dj)
+    with tarfile.open(info["archive"]) as tf:
+        assert "det_jobs.json" in tf.getnames()
+    assert (info["det_kernel"] / "det_worker.py").exists() and (info["det_kernel"] / "kernel-metadata.json").exists()

@@ -212,3 +212,23 @@ Same data, same seeds (0-4), same headline (task `vru_present`, worst-group accu
 **P4. Detection (RISE-literal version).** Specified when built (section 17).
 
 Implementation notes found while testing P5 (2026-10-12): the L-DAWA formula as printed (Eq. 5) is undefined for a layer whose global weights are all zero (the cosine has no direction; BatchNorm biases start at zero) and gives a negative weight to a client with a negative cosine. `ldawa` keeps the printed formula and takes cosine = 1 for an all-zero global layer; `ldawa_norm` is our own safer variant (negative cosines clamped to 0, weights normalized, FedAvg fallback). FedEMA is applied to SimSiam, not BYOL, and the formulas come from the papers' HTML text as returned by a fetch tool, not from reading the PDFs.
+
+## 17. Detection study (RISE-literal version; written 2026-10-13, before any detection run)
+
+**Why this scope.** ZOD objects are small: in the 3848x2168 camera image the median pedestrian is 21 px wide and 57 px tall, the median vehicle 62 x 39 px (measured on 1,500 frames, `modal_det_inspect.py`). The 144x256 shards used so far shrink a pedestrian to about 1 px, so detection needs its own image store. 100k frames at a usable size will not fit anywhere cheap, so detection uses a fixed subset.
+
+**Data (ADR-17).** 960x540 JPEG (factor 4 of the original), 11,659 frames: 3,000 training frames from each generation's countries (the `stream` split of `stage2.gen_countries`, sampled with weight count^-0.5 per condition group so rare groups are over-represented; this changes the training mix and is stated), 500 validation frames (`probe_train`, for recipe choices) and up to 400 test frames per condition group from `probe_test` (2,159). Boxes: the 4 corners of ZOD's object_detection.json reduced to an axis-aligned box; classes Vehicle, VulnerableVehicle, Pedestrian; `unclear` objects dropped; boxes smaller than 3x4 px at 960x540 dropped. Result: 159k boxes (122k vehicles, 15.5k vulnerable vehicles, 21k pedestrians).
+
+**Models (ADR-18).** Faster R-CNN with FPN. Generation A: ResNet-18 backbone, input 960x540. Generation B: MobileNetV3-small backbone, input 640x360 (cheaper chip and camera). Same small-anchor layout (8-256 px), ImageNet-pretrained backbones, frozen BatchNorm, SGD with cosine decay, mixed precision, a step with a non-finite loss is skipped and counted (more than 2% aborts the run).
+
+**Comparison (per seed, 3 seeds).** `det_A_teacher` (labels, generation-1 frames); `det_B_oracle` (labels, generation-2 frames); `det_B_floor` (labels on 10% of them); `det_B_kd_incar` (no labels: the teacher's boxes with score >= 0.5 on generation-2 frames are the targets); `det_B_kd_floor` (labels on the 10%, teacher boxes on the rest). Scored on the same test frames: COCO-style AP (own implementation, 101-point, IoU 0.50:0.95) and AP50, overall, per class and per condition group, with the worst group. Boxes are hard pseudo-labels, not soft distillation: the simplest transfer that crosses a change of architecture.
+
+**Pre-registered expectations.**
+- H4a: `det_B_kd_incar` has higher worst-group AP than `det_B_floor`.
+- H4b: `det_B_oracle` has higher AP than `det_B_kd_incar` (labels still help).
+- H4c: the teacher's errors on rare groups carry over: the gap between `det_B_kd_incar` and `det_B_oracle` is larger in wet/night and snow groups than in normal/day.
+- Not tested here (stated limitation): federated self-supervised pretraining for detection (stage 1 of the classification study), because the stage-1 backbones are 144x256 models and were not saved; a second generation (C); soft distillation.
+
+**Recipe.** Chosen on the validation frames of one separate seed (100) before any test number is looked at: learning rate and epochs, from the loss curve and validation AP of the teacher, oracle and kd runs.
+
+**Outcome (2026-10-13; 3 seeds, test frames).** Recipe chosen on validation frames of seed 100: more epochs did not help (teacher AP 0.135 at 6 and at 10 epochs), upsampling the input (teacher 756 px short side, student 504 px) did (0.157 and 0.068 on validation), so that recipe was fixed before the test run. Test AP: teacher 0.136, `det_B_oracle` 0.062, `det_B_floor` 0.009, `det_B_kd_incar` 0.069, `det_B_kd_floor` 0.069. H4a holds (kd minus floor +0.060, 95% CI +0.058 to +0.062; worst-group +0.043). H4b fails: the student on teacher boxes beat the student on true labels by 0.007 (95% CI +0.002 to +0.012); cause not tested. H4c: no evidence of a larger gap in rare groups. Caveat: the floor got the same epochs as the others (about 10x fewer steps), so it is nearly untrained and the gap-closed ratio (about 1.14) is inflated.

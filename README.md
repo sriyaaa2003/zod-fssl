@@ -22,8 +22,9 @@ MobileNet, lower resolution, narrower view) and generation C (smaller still, 8-b
 crosses as predictions: the old model runs inside the new car on its own frames (teacher-in-the-car), or on a small shared
 public set. A rarity-aware version weights rare conditions up. Chains A -> B -> C play the telephone game, and knowledge
 is also sent back from the small models to A (reverse transfer).
+The same generation-gap idea is repeated for object detection (Faster R-CNN, ZOD 2D boxes) in a smaller study.
 
-**Follow-ups on stage 1.** Two other aggregation rules (L-DAWA, FedEMA) and four ways of adapting less (train only the last
+**Follow-ups on stage 1.** Two other aggregation rules (L-DAWA, FedEMA) and three ways of adapting less (train only the last
 block, pull towards the starting weights, mix adapted and starting weights) test whether the cost of adapting can be avoided.
 
 ## Results
@@ -267,6 +268,47 @@ Paired by seed, reverse-transferred A' minus the original A (95% CI):
 - rev_A_from_ensemble, gen2: +0.040 (95% CI +0.028 to +0.052, n=5)
 - rev_A_from_ensemble, gen3: +0.009 (95% CI -0.010 to +0.028, n=5)
 
+#### Detection: Faster R-CNN, teacher A (ResNet-18) to student B (MobileNetV3), ZOD 2D boxes
+
+COCO-style AP (IoU 0.50:0.95) on held-out test frames from all 12 countries, rare condition groups over-represented.
+
+| model | seeds | AP | AP50 | worst-group AP | mean-group AP | Vehicle AP | VulnerableVehicle AP | Pedestrian AP |
+|---|---|---|---|---|---|---|---|---|
+| det_A_teacher | 3 | 0.136 ± 0.002 | 0.294 ± 0.004 | 0.112 ± 0.003 | 0.129 ± 0.003 | 0.285 ± 0.002 | 0.052 ± 0.003 | 0.070 ± 0.002 |
+| det_B_floor | 3 | 0.009 ± 0.000 | 0.032 ± 0.000 | 0.004 ± 0.001 | 0.008 ± 0.000 | 0.026 ± 0.001 | 0.001 ± 0.002 | 0.000 ± 0.000 |
+| det_B_kd_floor | 3 | 0.069 ± 0.001 | 0.165 ± 0.001 | 0.049 ± 0.003 | 0.069 ± 0.002 | 0.153 ± 0.001 | 0.022 ± 0.001 | 0.031 ± 0.003 |
+| det_B_kd_incar | 3 | 0.069 ± 0.001 | 0.166 ± 0.002 | 0.048 ± 0.001 | 0.069 ± 0.001 | 0.154 ± 0.001 | 0.020 ± 0.000 | 0.032 ± 0.002 |
+| det_B_oracle | 3 | 0.062 ± 0.001 | 0.155 ± 0.003 | 0.042 ± 0.001 | 0.065 ± 0.003 | 0.139 ± 0.002 | 0.018 ± 0.001 | 0.027 ± 0.002 |
+
+AP by condition group:
+
+| model | normal/day (n=400) | normal/night (n=400) | snow/day (n=400) | snow/night (n=260) | wet/day (n=400) | wet/night (n=299) |
+|---|---|---|---|---|---|---|
+| det_A_teacher | 0.146 ± 0.001 | 0.132 ± 0.004 | 0.130 ± 0.005 | 0.116 ± 0.010 | 0.137 ± 0.005 | 0.114 ± 0.002 |
+| det_B_floor | 0.010 ± 0.000 | 0.008 ± 0.001 | 0.009 ± 0.000 | 0.006 ± 0.000 | 0.009 ± 0.000 | 0.004 ± 0.001 |
+| det_B_kd_floor | 0.078 ± 0.001 | 0.060 ± 0.000 | 0.082 ± 0.002 | 0.080 ± 0.016 | 0.066 ± 0.001 | 0.049 ± 0.003 |
+| det_B_kd_incar | 0.077 ± 0.002 | 0.061 ± 0.001 | 0.084 ± 0.005 | 0.078 ± 0.004 | 0.068 ± 0.002 | 0.048 ± 0.001 |
+| det_B_oracle | 0.070 ± 0.000 | 0.050 ± 0.001 | 0.081 ± 0.005 | 0.089 ± 0.010 | 0.059 ± 0.002 | 0.042 ± 0.001 |
+
+Paired by seed, AP:
+- `det_B_kd_incar` minus `det_B_floor`: +0.060 (95% CI +0.058 to +0.062, n=3 seeds)
+- `det_B_kd_floor` minus `det_B_floor`: +0.060 (95% CI +0.058 to +0.062, n=3 seeds)
+- `det_B_oracle` minus `det_B_kd_incar`: -0.007 (95% CI -0.012 to -0.002, n=3 seeds)
+- `det_B_kd_floor` minus `det_B_kd_incar`: -0.000 (95% CI -0.003 to +0.003, n=3 seeds)
+
+Paired by seed, worst-group AP:
+- `det_B_kd_incar` minus `det_B_floor`: +0.043 (95% CI +0.040 to +0.047, n=3 seeds)
+- `det_B_kd_floor` minus `det_B_floor`: +0.045 (95% CI +0.034 to +0.056, n=3 seeds)
+- `det_B_oracle` minus `det_B_kd_incar`: -0.006 (95% CI -0.010 to -0.002, n=3 seeds)
+- `det_B_kd_floor` minus `det_B_kd_incar`: +0.001 (95% CI -0.008 to +0.011, n=3 seeds)
+
+Share of the floor-to-oracle AP gap closed, (student - floor) / (oracle - floor):
+- det_B_kd_incar: 1.139 ± 0.044 (n=3 seeds)
+- det_B_kd_floor: 1.134 ± 0.020 (n=3 seeds)
+
+Pseudo-labels (seed 0): the teacher's boxes with score >= 0.5 gave 14,751 boxes on frames that contain 27,990 true boxes.
+
+
 All tasks, per-country tables and every paired difference: [results/REPORT.md](results/REPORT.md).
 <!-- RESULTS:END -->
 
@@ -316,10 +358,27 @@ All tasks, per-country tables and every paired difference: [results/REPORT.md](r
   fell in two of three), so I read this as a task-dependent result with one clear positive. A model distilled from true labels
   of the new data (`rev_A_from_oracle`) forgot the old countries most (-0.068), which is the usual catastrophic-forgetting pattern.
 
+**Detection (teacher A to student B, 3 seeds).**
+- A MobileNetV3 Faster R-CNN student trained only on the ResNet-18 teacher's confident boxes (no labels) reached AP 0.069,
+  against 0.062 for the same student trained on all the true boxes and 0.009 for the student with 10% of the labels
+  (paired by seed, teacher boxes minus all true boxes: +0.007, 95% CI +0.002 to +0.012). The teacher itself reaches 0.136.
+  I did not test why the student trained on teacher boxes does slightly better than the one trained on true labels. One
+  possibility is that the teacher's boxes leave out the tiny objects the lower-resolution student cannot learn.
+- The student keeps its AP in the rare condition groups at about the same ratio as in normal daytime (wet/night 0.048
+  against 0.077 for normal/day); I found no sign that the rare groups are lost in the transfer, but with 3 seeds and 299 wet/night
+  test frames this is weak evidence.
+- Mixing the 10% labelled frames with teacher boxes for the rest gave the same AP as teacher boxes alone (difference 0.000).
+
 ## Limitations, stated plainly
-- The probes and stage-2 targets are image-level labels taken from ZOD's metadata (pedestrian visible, road type, traffic
-  density, road condition). This is not object detection, which the RISE thesis topic is about. Detection with ZOD's 2D boxes is
-  the obvious next stage.
+- The probes and the classification stage-2 targets are image-level labels taken from ZOD's metadata (pedestrian visible, road
+  type, traffic density, road condition). Object detection with ZOD's 2D boxes is a separate, smaller study (below): one
+  teacher-to-student step, 3 seeds, a fixed subset of 11,659 frames at 960x540, and absolute AP is low (the teacher reaches
+  0.136) because ZOD objects are tiny (median pedestrian about 5 px wide at that size). Federated self-supervised
+  pretraining was not run for detection.
+- In the detection study the "floor" student (10% of the labels) got the same number of epochs as the others, so it had about
+  ten times fewer training steps and is nearly untrained (AP 0.009). The share of the gap closed (above 1) is therefore
+  inflated and should not be read as "better than labels"; the fair comparison is the student trained on teacher boxes against
+  the student trained on all true boxes.
 - The backbone starts from ImageNet weights; this is adaptation of a shipped model, not training from scratch.
 - Five seeds. Seeds 3 and 4 were added after seeds 0-2 to tighten the intervals; all five are reported. Intervals are t-based
   on five numbers, and many comparisons were made, so single intervals that barely exclude zero should not be over-read.
@@ -328,7 +387,7 @@ All tasks, per-country tables and every paired difference: [results/REPORT.md](r
   stage-2 attempt had a diverged teacher and weak teachers; its results are archived on the Modal volume and are not
   reported. Details and numbers: `docs/BLUEPRINT.md`, ADR-8 to ADR-16.
 - Quantization is simulated (8-bit weights), and the "transition cars" carry both cameras so the teacher can read the old view.
-- Not done: object detection, an ensemble of per-country teachers as the first teacher, LiDAR, Sequences.
+- Not done: detection with federated pretraining or a second generation (C), soft distillation for detection, an ensemble of per-country teachers as the first teacher, LiDAR, Sequences.
 - The last 31 runs (phase-2 grid and reverse transfer) ran on Kaggle GPUs, the rest on Modal T4s; each result file records
   its hardware. The same code and seeds were used, but small numeric differences between GPUs are possible.
 - Compared with published federated self-supervised work, this study uses real country-level non-IID data on 8 MP driving

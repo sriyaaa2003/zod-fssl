@@ -11,6 +11,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .det_report import det_block
 from .report import (aggregator_pairs_md, gap_closed_md, load_records, paired_diff, retention_table, reverse_md,
                      split_records, stage2_pairs_md, table)
 
@@ -58,6 +59,9 @@ def build_block(results_dir: str | Path) -> str:
                 gap_closed_md(stage2, PRIMARY), ""]
     if reverse:
         out += [f"#### Reverse transfer: `{PRIMARY}`", "", reverse_md(reverse, PRIMARY), ""]
+    det = det_block(results_dir)
+    if det:
+        out += [det, ""]
     out.append("All tasks, per-country tables and every paired difference: [results/REPORT.md](results/REPORT.md).")
     return "\n".join(out)
 
